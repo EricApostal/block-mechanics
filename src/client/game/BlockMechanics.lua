@@ -21,25 +21,18 @@ local lastClickUp = true
 
 local function BuildChunk(startX, startZ)
     local chunkSize = 16
-    local scale = 256
+    local scale = 128
     local seed = 126
     for x = (startX*16)*3, (startX*16)*3 + chunkSize*3, 3 do
         for z = (startZ*16)*3, chunkSize*3 + (startZ*16)*3, 3  do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
-            local min, max = 0, scale
+            local min, max = 0, scale/2
             placeBlock( Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z) )
         end
     end
 end
-BuildChunk(0,0)
-for x = -10, 10 do
-    for y = -10, 10 do
-        BuildChunk(x,y)
-    end
-end
 
-function BlockMechanics:init()
-
+local function handleBreaking()
     mouse.Button2Down:Connect(function()
         if (not lastClickUp) or not (mouse.Target) or not (mouse.Target.Name == "block") then return end
         
@@ -64,8 +57,22 @@ function BlockMechanics:init()
     mouse.Button1Down:Connect(function()
         mouse.Target:Destroy()
     end)
+end
 
+local function buildChunks()
+    coroutine.wrap(function()
+        BuildChunk(0,0)
+        for x = -10, 10 do
+            for y = -10, 10 do
+                BuildChunk(x,y)
+            end
+        end
+    end)()
+end
 
+function BlockMechanics:init()
+    handleBreaking()
+    buildChunks()
 end
 
 return BlockMechanics

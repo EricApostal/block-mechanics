@@ -15,7 +15,7 @@ local function updatePos()
     coroutine.wrap(function() 
         while task.wait() do
             local pos = localplayer.Character:FindFirstChild("HumanoidRootPart").Position
-            Position:set( math.round(pos.X * 30)/10 .. ", " .. math.round(pos.Y * 30)/10 .. ", " .. math.round(pos.Z * 30)/10 )
+            Position:set( math.round(pos.X * (10/3))/10 .. ", " .. math.round(pos.Y * (10/3))/10 .. ", " .. math.round(pos.Z * (10/3))/10 )
         end
     end)()
 end
