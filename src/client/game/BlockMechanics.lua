@@ -1,9 +1,6 @@
 local BlockMechanics = {}
 
 local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer -- 17.268
 
@@ -21,20 +18,15 @@ local function placeBlock(position)
 end
 
 local lastClickUp = true
-local function hitCheck()
-    --[[
-        This will be useful later for when I implement edge highlighting
-    ]]
-end
 
 local function BuildChunk(startX, startZ)
     local chunkSize = 16
-    local scale = 500
+    local scale = 256
     local seed = 126
     for x = (startX*16)*3, (startX*16)*3 + chunkSize*3, 3 do
         for z = (startZ*16)*3, chunkSize*3 + (startZ*16)*3, 3  do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
-            local min, max = 0, 500
+            local min, max = 0, scale
             placeBlock( Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z) )
         end
     end
