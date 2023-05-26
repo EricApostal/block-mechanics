@@ -5,11 +5,16 @@ registry = "test"
 [[package]]
 name = "eric/blockmechanics"
 version = "0.1.0"
-dependencies = [["knit", "sleitnick/knit@1.5.1"]]
+dependencies = [["fusion", "mattschrubb/fusion@1.2.5"], ["knit", "sleitnick/knit@1.5.1"]]
 
 [[package]]
 name = "evaera/promise"
 version = "4.0.0"
+dependencies = []
+
+[[package]]
+name = "mattschrubb/fusion"
+version = "1.2.5"
 dependencies = []
 
 [[package]]

@@ -1,10 +1,13 @@
 {
-  "name": "BlockMechanics",
+  "name": "coin game",
   "tree": {
     "$className": "DataModel",
 
     "ReplicatedStorage": {
-      "Shared": {
+      "modules": {
+        "$path": "Packages"
+      },
+      "Common": {
         "$path": "src/shared"
       }
     },

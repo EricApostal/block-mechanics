@@ -6,3 +6,4 @@ realm = "shared"
 
 [dependencies]
 knit = "sleitnick/knit@1.5.1"
+fusion = "mattschrubb/fusion@1.2.5"
