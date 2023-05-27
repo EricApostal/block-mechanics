@@ -1,7 +1,7 @@
-local network = {}
+local Data = {}
 
-function network:init() 
+function Data:init() 
 
 end
 
-return network
+return Data

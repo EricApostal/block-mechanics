@@ -5,8 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 
+local Character = require(script.Parent.Character)
 local player = Players.LocalPlayer -- 17.268
-
 local mouse = player:GetMouse()
 
 local BlockService = Knit.GetService("BlockService")
@@ -47,9 +47,38 @@ local function handleBreaking()
     end)
 end
 
+local function handleChunkRequests()
+    --[[
+        Accounts for render distance, and requests that the server builds chunks
+        This will need some sort of system to find the chunk radius at which you need loaded
+    ]]
+
+    local render_distance = 4
+    local chunks = {}
+    BlockService:GetChunks()
+    while true do
+        local currentX = Character:GetChunk().X
+        local currentZ = Character:GetChunk().Y
+
+        for x = currentX-(render_distance), currentX+(render_distance)-1 do
+            for z = currentZ-(render_distance), currentZ+(render_distance)-1 do
+                table.insert(chunks, Vector2.new(x,z))
+            end
+        end
+        -- print( table.concat(chunks,  ", ") )
+        print(#chunks)
+        BlockService:LoadChunks(chunks)
+        chunks = {}
+        task.wait(10)
+    end
+end
+
 function BlockMechanics:init()
     handlePlacing()
     handleBreaking()
+    spawn(function()
+        handleChunkRequests()
+    end)
 end
 
 return BlockMechanics

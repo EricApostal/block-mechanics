@@ -8,14 +8,26 @@ local BlockService = Knit.CreateService {
 }
 
 local function registerFunctions()
-    function network:SetBlock(player, position, type)
+    function BlockService:SetBlock(player, position, type)
         BlockHandler:placeBlock(position, "oak_log")
     end
 
-    function network:BreakBlock(player, block)
+    function BlockService:BreakBlock(player, block)
         BlockHandler:breakBlock(block)
     end
+
+    function BlockService:LoadChunks(player, chunk_array)
+        BlockHandler:buildChunks(chunk_array)
+    end
     
+    function BlockService:LoadChunk(player, chunk_vec)
+        BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
+    end
+
+    function BlockService:GetChunks(player) 
+        print("getting them chunks")
+    end
+
     --[[
         Client Functions :D
 
@@ -23,12 +35,20 @@ local function registerFunctions()
     ]]
 
     function BlockService.Client:SetBlock(player, position, type)
-        network:SetBlock(player, position, type)
+        BlockService:SetBlock(player, position, type)
     end
 
     function BlockService.Client:BreakBlock(player, block)
         if not block then return end
-        network:BreakBlock(player, block)
+        BlockService:BreakBlock(player, block)
+    end
+
+    function BlockService.Client:LoadChunks(player, chunk_array)
+        BlockService:LoadChunks(player, chunk_array)
+    end
+
+    function BlockService.Client:GetChunks(player) 
+        print("getting them chunks")
     end
 
 end
