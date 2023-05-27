@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
+local Data = require(script.Parent.Data)
 
 local Character = require(script.Parent.Character)
 local player = Players.LocalPlayer -- 17.268
@@ -47,15 +48,34 @@ local function handleBreaking()
     end)
 end
 
+local function buildBlock(position, type)
+    local block = ReplicatedStorage.blocks:WaitForChild(type):Clone()
+    CollectionService:AddTag(block, "block")
+    block.Parent = workspace.blocks
+    if block:IsA("BasePart") then
+        block.Position = position
+        block.Anchored = true
+    else
+        block:SetPrimaryPartCFrame(CFrame.new(position))
+        local Folder = Instance.new("Folder")
+        Folder.Parent = workspace:WaitForChild("blocks")
+        Folder.Name = "Model Folder Conversion"
+        for _, part in block:GetChildren() do
+            CollectionService:AddTag(part, "block")
+            part.Parent = Folder
+        end
+        block:Destroy()
+    end
+end
+
 local function handleChunkRequests()
     --[[
         Accounts for render distance, and requests that the server builds chunks
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 4
+    local render_distance = 2
     local chunks = {}
-    BlockService:GetChunks()
     while true do
         local currentX = Character:GetChunk().X
         local currentZ = Character:GetChunk().Y
@@ -65,11 +85,22 @@ local function handleChunkRequests()
                 table.insert(chunks, Vector2.new(x,z))
             end
         end
-        -- print( table.concat(chunks,  ", ") )
-        print(#chunks)
-        BlockService:LoadChunks(chunks)
+
+        for _,v in chunks do
+            if Data:IsChunkLoaded(v) then
+                continue
+            end
+            BlockService:LoadChunk(v):andThen(function(blocks) 
+                -- print(blocks[1]["position"])
+                for _, block in blocks do
+                    buildBlock(block["position"], block["material"])
+                    Data:RegisterChunk(v)
+                end
+            end)
+            task.wait(.2)
+        end
         chunks = {}
-        task.wait(10)
+        task.wait(1)
     end
 end
 

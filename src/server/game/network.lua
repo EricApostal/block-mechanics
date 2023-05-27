@@ -17,15 +17,12 @@ local function registerFunctions()
     end
 
     function BlockService:LoadChunks(player, chunk_array)
-        BlockHandler:buildChunks(chunk_array)
+        return BlockHandler:buildChunks(chunk_array)
     end
     
     function BlockService:LoadChunk(player, chunk_vec)
-        BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
-    end
-
-    function BlockService:GetChunks(player) 
-        print("getting them chunks")
+        local data = BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
+        return data
     end
 
     --[[
@@ -44,11 +41,11 @@ local function registerFunctions()
     end
 
     function BlockService.Client:LoadChunks(player, chunk_array)
-        BlockService:LoadChunks(player, chunk_array)
+        return BlockService:LoadChunks(player, chunk_array)
     end
 
-    function BlockService.Client:GetChunks(player) 
-        print("getting them chunks")
+    function BlockService.Client:LoadChunk(player, chunk_vec)
+        return BlockService:LoadChunk(player, chunk_vec)
     end
 
 end

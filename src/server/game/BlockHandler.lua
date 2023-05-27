@@ -51,8 +51,9 @@ function BlockHandler:buildChunk(startX, startZ)
             if math.random(0,50) == 1 then
                 blockData["position"] =  Vector3.new(x, 3+math.round( (min+(max-min)*y)/3)*3, z)
                 blockData["material"] = "tree"
+                table.insert(chunkData, blockData)
             end
-            table.insert(chunkData, blockData)
+            
         end
     end
     return chunkData
