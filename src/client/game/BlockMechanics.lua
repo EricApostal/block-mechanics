@@ -25,16 +25,18 @@ local lastClickUp = true
 
 local function BuildChunk(startX, startZ)
     local chunkSize = 16
-    local scale = 1024
+    local scale = 256
     local seed = 126
     for x = (startX*16)*3, (startX*16)*3 + chunkSize*3, 3 do
         for z = (startZ*16)*3, chunkSize*3 + (startZ*16)*3, 3  do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
             local min, max = 0, scale/2
             placeBlock( Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z), "grass" )
-            -- math.randomseed(seed)
-            if math.random(0,50) == 1 then
-                placeBlock( Vector3.new(x, 3+math.round( (min+(max-min)*y)/3)*3, z), "tree" )
+            math.randomseed(seed)
+            for i = 1, 50 do
+                if math.random(1, 25) == i then
+                    placeBlock( Vector3.new(x, 3+math.round( (min+(max-min)*y)/3)*3, z), "tree" )
+                end
             end
         end
     end
@@ -70,8 +72,8 @@ end
 local function buildChunks()
     --coroutine.wrap(function()
         BuildChunk(0,0)
-        for x = -7, 7 do
-            for y = -7, 7 do
+        for x = -3, 3 do
+            for y = -3, 3 do
                 BuildChunk(x,y)
             end
             task.wait()
