@@ -6,23 +6,7 @@ local CollectionService = game:GetService("CollectionService")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 
 function BlockHandler:placeBlock(position, type)
-    local block = ReplicatedStorage.blocks:WaitForChild(type):Clone()
-    CollectionService:AddTag(block, "block")
-    block.Parent = workspace.blocks
-    if block:IsA("BasePart") then
-        block.Position = position
-        block.Anchored = true
-    else
-        block:SetPrimaryPartCFrame(CFrame.new(position))
-        local Folder = Instance.new("Folder")
-        Folder.Parent = workspace:WaitForChild("blocks")
-        Folder.Name = "Model Folder Conversion"
-        for _, part in block:GetChildren() do
-            CollectionService:AddTag(part, "block")
-            part.Parent = Folder
-        end
-        block:Destroy()
-    end
+
 end
 
 function BlockHandler:breakBlock(block)
@@ -68,7 +52,6 @@ function BlockHandler:buildChunks(chunks)
 end
 
 function BlockHandler:init()
-    -- buildChunks()
 end
 
 return BlockHandler

@@ -97,10 +97,10 @@ local function handleChunkRequests()
                     Data:RegisterChunk(v)
                 end
             end)
-            task.wait(.2)
+            wait()
         end
         chunks = {}
-        task.wait(1)
+        task.wait(.1)
     end
 end
 

@@ -2,27 +2,23 @@ local network = {}
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local BlockHandler = require(script.Parent.BlockHandler)
+local Data = require(script.Parent.Data)
 
 local BlockService = Knit.CreateService {
     Name = "BlockService",
 }
 
 local function registerFunctions()
-    function BlockService:SetBlock(player, position, type)
-        BlockHandler:placeBlock(position, "oak_log")
+    function BlockService:SetBlock(player, position, material)
+        BlockHandler:placeBlock(position, material)
     end
 
     function BlockService:BreakBlock(player, block)
         BlockHandler:breakBlock(block)
     end
-
-    function BlockService:LoadChunks(player, chunk_array)
-        return BlockHandler:buildChunks(chunk_array)
-    end
     
     function BlockService:LoadChunk(player, chunk_vec)
-        local data = BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
-        return data
+        return Data:LoadChunk(player, chunk_vec) -- BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
     end
 
     --[[
@@ -38,10 +34,6 @@ local function registerFunctions()
     function BlockService.Client:BreakBlock(player, block)
         if not block then return end
         BlockService:BreakBlock(player, block)
-    end
-
-    function BlockService.Client:LoadChunks(player, chunk_array)
-        return BlockService:LoadChunks(player, chunk_array)
     end
 
     function BlockService.Client:LoadChunk(player, chunk_vec)
