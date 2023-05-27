@@ -18,6 +18,7 @@ local function handleMovement()
                 walkspeed = 16.836
                 FOV = 88
             end
+            while not character.Humanoid do task.wait() end
             character.Humanoid.JumpHeight = 3.75
             camera.FieldOfView = FOV
             character.Humanoid.WalkSpeed = walkspeed
