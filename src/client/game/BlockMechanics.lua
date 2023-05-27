@@ -9,11 +9,31 @@ local Data = require(script.Parent.Data)
 local Character = require(script.Parent.Character)
 local player = Players.LocalPlayer -- 17.268
 local mouse = player:GetMouse()
-
 local BlockService = Knit.GetService("BlockService")
 
-local function placeBlock(position, type)
-    BlockService:SetBlock(position, type)
+local function placeBlock(position, material)
+    --[[
+        Alright so I have to update the user's own chunk data
+        which means I need to find what chunk they placed it in, then add that block manually, then push to the server
+
+        Or I push what block changed to the server, then I figure out what chunk I need to reload based on it's XYZ
+    ]]
+    local chunkKey = { math.round(position.X/3/16), math.round(position.Z/3/16) }
+    
+    local chunkData = Data:GetChunkData(chunkKey)
+    local block = {}
+
+    print("chunk key on click: ")
+    print(chunkKey)
+    print("data")
+    print(chunkData)
+
+    block["position"] = position
+    block["material"] = material
+
+    table.insert(chunkData, block)
+    BlockService:SetChunk(chunkKey, chunkData)
+    -- BlockService:SetBlock(position, material)
 end
 
 local lastClickUp = true
@@ -77,12 +97,11 @@ local function handleChunkRequests()
     local render_distance = 2
     local chunks = {}
     while true do
-        local currentX = Character:GetChunk().X
-        local currentZ = Character:GetChunk().Y
-
+        local currentX = Character:GetChunk()[1]
+        local currentZ = Character:GetChunk()[2]
         for x = currentX-(render_distance), currentX+(render_distance)-1 do
             for z = currentZ-(render_distance), currentZ+(render_distance)-1 do
-                table.insert(chunks, Vector2.new(x,z))
+                table.insert(chunks, {x, z})
             end
         end
 
@@ -91,18 +110,37 @@ local function handleChunkRequests()
                 continue
             end
             BlockService:LoadChunk(v):andThen(function(blocks) 
+                Data:RegisterChunk(v, blocks)
                 -- print(blocks[1]["position"])
                 for _, block in blocks do
                     buildBlock(block["position"], block["material"])
-                    Data:RegisterChunk(v)
                 end
             end)
             wait()
         end
         chunks = {}
-        task.wait(.1)
+        task.wait(1)
     end
 end
+
+
+BlockService.UpdateChunk:Connect(function(chunkVec, newChunkData)
+    print("updating chunk...")
+    -- BlockService:LoadChunk(chunkVec, chunkData)
+
+    --[[
+        I can get the locally stored version, compare to find the differences
+        When difference found, either add or remove block
+    ]]
+    local oldChunkData = Data:GetChunkData(chunkVec)
+    for _, block in newChunkData do
+        if not table.find(oldChunkData, block) then
+            buildBlock(block["position"], block["material"])
+        end
+    end
+
+end)
+
 
 function BlockMechanics:init()
     handlePlacing()

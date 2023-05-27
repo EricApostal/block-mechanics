@@ -6,8 +6,8 @@ local ChunkBuilder = require(script.game.ChunkBuilder)
 local Data = require(script.game.Data)
 
 network:init()
+Knit.Start():catch(warn):await()
+
 BlockHandler:init()
 ChunkBuilder:init()
 Data:init()
-
-Knit.Start():catch(warn):await()

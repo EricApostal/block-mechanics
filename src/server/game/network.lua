@@ -6,11 +6,14 @@ local Data = require(script.Parent.Data)
 
 local BlockService = Knit.CreateService {
     Name = "BlockService",
+    Client = {
+        UpdateChunk = Knit.CreateSignal(), -- Create the signal
+    },
 }
 
 local function registerFunctions()
-    function BlockService:SetBlock(player, position, material)
-        BlockHandler:placeBlock(position, material)
+    function BlockService:SetChunk(player, chunkVec, chunkData)
+        Data:SetChunk(player, chunkVec, chunkData)
     end
 
     function BlockService:BreakBlock(player, block)
@@ -27,8 +30,8 @@ local function registerFunctions()
         Because of the way knit is structured it's ideal for handling bad or malicious requests
     ]]
 
-    function BlockService.Client:SetBlock(player, position, type)
-        BlockService:SetBlock(player, position, type)
+    function BlockService.Client:SetChunk(player, chunkVec, chunkData)
+        Data:SetChunk(player, chunkVec, chunkData)
     end
 
     function BlockService.Client:BreakBlock(player, block)

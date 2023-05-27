@@ -5,8 +5,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 
-function BlockHandler:placeBlock(position, type)
+-- local BlockService = Knit.GetService("BlockService")
 
+function BlockHandler:placeBlock(position, type)
+    
 end
 
 function BlockHandler:breakBlock(block)
