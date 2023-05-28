@@ -1,6 +1,7 @@
 local Data = {}
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
+local Players = game:GetService("Players")
 local BlockHandler = require(script.Parent.BlockHandler)
 
 local cachedWorldData = {} -- rip performance
@@ -30,9 +31,11 @@ When working on updating the chunk for everyone, fire the clients with the updat
 but do another check (like the chunk update) to see what blocks actually need to be re-rendered
 ]]
 
-function Data:SetChunk(player, chunkVec, chunkData)
+function Data:SetChunk(player, chunkVec, chunkData, chunkBuffer)
     cachedWorldData[chunkVec] = chunkData -- I should verify it's in the array... maybe it's fine
-    BlockService.Client.UpdateChunk:Fire(player, chunkVec, chunkData)
+    for _, plr in Players:GetPlayers() do
+        BlockService.Client.UpdateChunk:Fire(plr, chunkVec, chunkData, chunkBuffer)
+    end
 end
 
 function Data:init()

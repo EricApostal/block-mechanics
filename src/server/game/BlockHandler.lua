@@ -5,6 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 
+local HttpService = game:GetService("HttpService")
+
 -- local BlockService = Knit.GetService("BlockService")
 
 function BlockHandler:placeBlock(position, type)
@@ -30,15 +32,16 @@ function BlockHandler:buildChunk(startX, startZ)
             local blockData = {}
             blockData["position"] = Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z)
             blockData["material"] = "grass"
+            blockData["id"] = HttpService:GenerateGUID(false)
 
             table.insert(chunkData, blockData)
 
-            blockData = {}
-            if math.random(0,50) == 1 then
-                blockData["position"] =  Vector3.new(x, 3+math.round( (min+(max-min)*y)/3)*3, z)
-                blockData["material"] = "tree"
-                table.insert(chunkData, blockData)
-            end
+            -- blockData = {}
+            -- if math.random(0,50) == 1 then
+            --     blockData["position"] =  Vector3.new(x, 3+math.round( (min+(max-min)*y)/3)*3, z)
+            --     blockData["material"] = "tree"
+            --     table.insert(chunkData, blockData)
+            -- end
             
         end
     end
