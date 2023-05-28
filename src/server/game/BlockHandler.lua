@@ -18,6 +18,18 @@ function BlockHandler:breakBlock(block)
     block:Destroy()
 end
 
+local function buildModel(position, material)
+    --[[
+        Makes it easier to add pre-build thinks like villages
+    ]]
+    local model = ReplicatedStorage.models[material]:Clone()
+    model:SetPrimaryPartCFrame(CFrame.new(position))
+    for _, block in model:GetChildren() do
+        BlockHandler:placeBlock(block.position, block.Name)
+    end
+    model:Destroy()
+end
+
 function BlockHandler:buildChunk(startX, startZ)
     local chunkSize = 16
     local scale = 256
@@ -35,6 +47,9 @@ function BlockHandler:buildChunk(startX, startZ)
                 ["position"] = pos,
                 ["material"] = "grass"
             }
+            if math.random(1, 50) == 1 then
+                buildModel(Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z), "tree")
+            end
             table.insert(blockData, chunkData)
         end
     end
@@ -62,7 +77,7 @@ local function persistChunkLoading()
             local currentZ = math.round(pos.Z)
 
             local chunks = {}
-            for x = currentX-(renderDistance), currentX+(renderDistance)-1 do
+            for x = math.round(currentX-(renderDistance/2)), math.round(currentX+(renderDistance)-1) do
                 for z = currentZ-(renderDistance), currentZ+(renderDistance)-1 do
                     if not Data:IsChunkLoaded({x, z}) then
                         table.insert(chunks, {x, z})
@@ -77,7 +92,6 @@ local function persistChunkLoading()
 end
 
 function BlockHandler:init()
-    print("ran init")
     BlockHandler:buildChunk(0, 0)
     spawn( persistChunkLoading )
 end
