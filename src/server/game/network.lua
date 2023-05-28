@@ -7,17 +7,21 @@ local Data = require(script.Parent.Data)
 local BlockService = Knit.CreateService {
     Name = "BlockService",
     Client = {
-        onChunkPacket = Knit.CreateSignal(), -- so the client can recieve chunk packets
+        UpdateChunk = Knit.CreateSignal(), -- Create the signal
     },
 }
 
 local function registerFunctions()
+    function BlockService:SetChunk(player, chunkVec, chunkData, buffer)
+        Data:SetChunk(player, chunkVec, chunkData, buffer)
+    end
+
     function BlockService:BreakBlock(player, block)
         BlockHandler:breakBlock(block)
     end
-
-    function BlockService:PlaceBlock(player, position, material)
-        BlockHandler:placeBlock(position, material)
+    
+    function BlockService:LoadChunk(player, chunk_vec)
+        return Data:LoadChunk(player, chunk_vec) -- BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
     end
 
     --[[
@@ -26,6 +30,10 @@ local function registerFunctions()
         Because of the way knit is structured it's ideal for handling bad or malicious requests
     ]]
 
+    function BlockService.Client:SetChunk(player, chunkVec, chunkData)
+        Data:SetChunk(player, chunkVec, chunkData)
+    end
+
     function BlockService.Client:BreakBlock(player, block)
         if not block then return end
         BlockService:BreakBlock(player, block)
@@ -33,10 +41,6 @@ local function registerFunctions()
 
     function BlockService.Client:LoadChunk(player, chunk_vec)
         return BlockService:LoadChunk(player, chunk_vec)
-    end
-
-    function BlockService.Client:PlaceBlock(player, block, position)
-        return BlockService:PlaceBlock(player, block, position)
     end
 
 end

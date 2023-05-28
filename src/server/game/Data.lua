@@ -2,31 +2,44 @@ local Data = {}
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Players = game:GetService("Players")
+local BlockHandler = require(script.Parent.BlockHandler)
 
+local cachedWorldData = {} -- rip performance
 
---[[
-    this file is still mostly applicable post-net change, it's just has a lesser purpose now
+local BlockService
 
-    This will be to maintain the world state for saving n stuff
-]]
-
-local cachedWorldData = {}
-
-function Data:IsChunkLoaded(chunkKey)
-    for key, _ in cachedWorldData do
-        if key[1] == chunkKey[1] and key[2] == chunkKey[2] then
+function Data:LoadChunk(player, chunkKey)
+    -- local BlockService = Knit.GetService("BlockService")
+    -- Hopefully I can make the type of chunkKey a vector2
+    for key, chunkData in cachedWorldData do
+        if key == chunkKey then
             -- chunk already loaded, just return
-            return true
+            return chunkData
         end
     end
-    return false
+    
+    -- if the codepath gets here, then we need to gen the chunk
+    local chunk = BlockHandler:buildChunk(chunkKey[1], chunkKey[2])
+
+    cachedWorldData[chunkKey] = chunk
+    return chunk
 end
 
-function Data:RegisterChunk(chunkKey, chunkData)
-    cachedWorldData[chunkKey] = chunkData
+--[[
+IDEA
+When working on updating the chunk for everyone, fire the clients with the updated changes,
+but do another check (like the chunk update) to see what blocks actually need to be re-rendered
+]]
+
+function Data:SetChunk(player, chunkVec, chunkData, chunkBuffer)
+    cachedWorldData[chunkVec] = chunkData -- I should verify it's in the array... maybe it's fine
+    for _, plr in Players:GetPlayers() do
+        BlockService.Client.UpdateChunk:Fire(plr, chunkVec, chunkData, chunkBuffer)
+    end
 end
 
 function Data:init()
+    BlockService = Knit.GetService("BlockService")
 end
 
 return Data
