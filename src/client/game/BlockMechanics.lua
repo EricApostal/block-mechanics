@@ -14,7 +14,6 @@ local mouse = player:GetMouse()
 local BlockService
 
 local function placeBlock(position, material)
-    print("placing block")
     BlockService:PlaceBlock(position, material)
 end
 
@@ -54,12 +53,43 @@ local function handleBreaking()
     end)
 end
 
+local function handleUnloading()
+    local renderDistance = 2
+
+    while wait() do
+        local pos = Character:GetChunk()
+        local currentX = math.round(pos[1])
+        local currentZ = math.round(pos[2])
+
+        local shouldBeLoaded = {}
+        for x = math.round(currentX - (renderDistance / 2)), math.round(currentX + (renderDistance - 1)) do
+            for z = currentZ - renderDistance, currentZ + (renderDistance - 1) do
+                table.insert(shouldBeLoaded, x .. "," .. z)
+            end
+        end
+
+        for _, chunk in ipairs(workspace.blocks:GetChildren()) do
+            if not table.find(shouldBeLoaded, chunk.Name) then
+                for _, block in ipairs(chunk:GetDescendants()) do
+                    block.Transparency = 1
+                end
+            else 
+                for _, block in ipairs(chunk:GetDescendants()) do
+                    block.Transparency = 0
+                end
+            end
+        
+        end
+    end
+end
+
 
 function BlockMechanics:init()
     BlockService = Knit.GetService("BlockService")
 
     handlePlacing()
     handleBreaking()
+    -- spawn(handleUnloading)
 end
 
 return BlockMechanics

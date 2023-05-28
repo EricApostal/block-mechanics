@@ -7,10 +7,27 @@ local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Data = require(script.Parent.Data)
 -- local BlockService = Knit.GetService("BlockService")
 
-function BlockHandler:placeBlock(position, material)
+function BlockHandler:placeBlock(position, material, parent)
     local block = ReplicatedStorage.blocks[material]:Clone()
     block.Position = position
-    block.Parent = workspace
+    
+    local rawChunk = {math.round((position/3/16).X), math.round((position/3/16).Z)}
+    if rawChunk[1] == -0 then rawChunk[1] = 0 end
+    if rawChunk[2] == -0 then rawChunk[2] = 0 end
+
+    local chunk = {rawChunk[1],rawChunk[2]}
+    local folder = workspace.blocks:FindFirstChild(chunk[1] .. "," .. chunk[2])
+
+    --[[
+        This is a very shitty way of "fixing" this
+    ]]
+    if folder == nil then
+        folder = Instance.new("Folder")
+        folder.Name = chunk[1] .. "," .. chunk[2]
+        folder.Parent = workspace.blocks
+    end
+
+    block.Parent = workspace.blocks[chunk[1] .. "," .. chunk[2]]
     CollectionService:AddTag(block, "block")
 end
 
@@ -18,7 +35,7 @@ function BlockHandler:breakBlock(block)
     block:Destroy()
 end
 
-local function buildModel(position, material)
+local function buildModel(position, material, parent)
     --[[
         Makes it easier to add pre-build thinks like villages
     ]]
@@ -42,13 +59,23 @@ function BlockHandler:buildChunk(startX, startZ)
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
             local min, max = 0, scale/2
             local pos = Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z)
-            BlockHandler:placeBlock(pos, "grass")
+
+            local material = "grass"
+
+            local folder = workspace.blocks:FindFirstChild(startX .. "," .. startZ)
+            if folder == nil then
+                folder = Instance.new("Folder")
+                folder.Name = startX .. "," .. startZ
+                folder.Parent = workspace.blocks
+            end
+
+            BlockHandler:placeBlock(pos, material, folder)
             local blockData = {
                 ["position"] = pos,
-                ["material"] = "grass"
+                ["material"] = material
             }
             if math.random(1, 50) == 1 then
-                buildModel(Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z), "tree")
+                buildModel(Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z), "tree", folder)
             end
             table.insert(blockData, chunkData)
         end
@@ -57,15 +84,16 @@ function BlockHandler:buildChunk(startX, startZ)
 end
 
 function BlockHandler:buildChunks(chunks)
-    coroutine.wrap(function()
+    --coroutine.wrap(function()
         for _,v in chunks do
             BlockHandler:buildChunk(v[1], v[2])
+            task.wait(.1)
         end
-    end)()
+    --end)()
 end
 
 local function persistChunkLoading()
-    local renderDistance = 4
+    local renderDistance = 5
 
     while true do
         for _, player in Players:GetPlayers() do
