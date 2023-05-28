@@ -3,9 +3,11 @@ local BlockHandler = {}
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
+local ServerStorage = game:GetService("ServerStorage")
+
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Data = require(script.Parent.Data)
--- local BlockService = Knit.GetService("BlockService")
+local BlockService
 
 function BlockHandler:placeBlock(position, material, parent)
     local block = ReplicatedStorage.blocks[material]:Clone()
@@ -16,7 +18,7 @@ function BlockHandler:placeBlock(position, material, parent)
     if rawChunk[2] == -0 then rawChunk[2] = 0 end
 
     local chunk = {rawChunk[1],rawChunk[2]}
-    local folder = workspace.blocks:FindFirstChild(chunk[1] .. "," .. chunk[2])
+    local folder = ServerStorage.blocks:FindFirstChild(chunk[1] .. "," .. chunk[2])
 
     --[[
         This is a very shitty way of "fixing" this
@@ -24,11 +26,12 @@ function BlockHandler:placeBlock(position, material, parent)
     if folder == nil then
         folder = Instance.new("Folder")
         folder.Name = chunk[1] .. "," .. chunk[2]
-        folder.Parent = workspace.blocks
+        folder.Parent = ServerStorage.blocks
     end
 
-    block.Parent = workspace.blocks[chunk[1] .. "," .. chunk[2]]
+    block.Parent = ServerStorage.blocks[chunk[1] .. "," .. chunk[2]]
     CollectionService:AddTag(block, "block")
+    return block
 end
 
 function BlockHandler:breakBlock(block)
@@ -47,7 +50,7 @@ local function buildModel(position, material, parent)
     model:Destroy()
 end
 
-function BlockHandler:buildChunk(startX, startZ)
+function BlockHandler:buildChunk(startX, startZ, player)
     local chunkSize = 16
     local scale = 256
     local seed = 126
@@ -62,32 +65,39 @@ function BlockHandler:buildChunk(startX, startZ)
 
             local material = "grass"
 
-            local folder = workspace.blocks:FindFirstChild(startX .. "," .. startZ)
+            local folder = ServerStorage.blocks:FindFirstChild(startX .. "," .. startZ)
             if folder == nil then
                 folder = Instance.new("Folder")
                 folder.Name = startX .. "," .. startZ
-                folder.Parent = workspace.blocks
+                folder.Parent = ServerStorage.blocks
             end
 
-            BlockHandler:placeBlock(pos, material, folder)
+            local block = BlockHandler:placeBlock(pos, material, folder)
             local blockData = {
+                --[[
+                    Originally for datastorage since you obviously can save instances,
+                    but that may not work out
+                ]]
                 ["position"] = pos,
                 ["material"] = material
             }
             if math.random(1, 50) == 1 then
                 buildModel(Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z), "tree", folder)
             end
-            table.insert(blockData, chunkData)
+            table.insert(chunkData, block) -- blockData is ideal
         end
     end
     Data:RegisterChunk({startX, startZ}, chunkData)
+    print("pre-packet")
+    print(#chunkData)
+    BlockService.Client.onChunkPacket:Fire(player, {startX, startZ}, chunkData)
 end
 
-function BlockHandler:buildChunks(chunks)
+function BlockHandler:buildChunks(chunks, player)
     --coroutine.wrap(function()
         for _,v in chunks do
-            BlockHandler:buildChunk(v[1], v[2])
-            task.wait(.1)
+            BlockHandler:buildChunk(v[1], v[2], player)
+            -- task.wait(.1)
         end
     --end)()
 end
@@ -112,15 +122,16 @@ local function persistChunkLoading()
                     end
                 end
             end
-            BlockHandler:buildChunks(chunks)
-            task.wait()
+            BlockHandler:buildChunks(chunks, player)
+           
+            task.wait(10)
         end
         wait()
     end
 end
 
 function BlockHandler:init()
-    BlockHandler:buildChunk(0, 0)
+    BlockService = Knit.GetService("BlockService")
     spawn( persistChunkLoading )
 end
 

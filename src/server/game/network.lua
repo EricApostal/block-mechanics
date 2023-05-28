@@ -7,7 +7,7 @@ local Data = require(script.Parent.Data)
 local BlockService = Knit.CreateService {
     Name = "BlockService",
     Client = {
-        UpdateChunk = Knit.CreateSignal(), -- Create the signal
+        onChunkPacket = Knit.CreateSignal(), -- so the client can recieve chunk packets
     },
 }
 

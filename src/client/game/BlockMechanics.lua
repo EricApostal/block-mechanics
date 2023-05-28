@@ -68,7 +68,7 @@ local function handleUnloading()
             end
         end
 
-        for _, chunk in ipairs(workspace.blocks:GetChildren()) do
+        for _, chunk in ipairs(ReplicatedStorage.MapCache:GetChildren()) do
             if not table.find(shouldBeLoaded, chunk.Name) then
                 for _, block in ipairs(chunk:GetDescendants()) do
                     block.Transparency = 1
@@ -83,12 +83,24 @@ local function handleUnloading()
     end
 end
 
+local function handleChunkPackets()
+    BlockService.onChunkPacket:Connect(function(chunkPos, chunkData)
+        print("post packet: ")
+        print(#chunkData)
+        -- local x, z = chunkPos[1], chunkPos[2]
+        for _, block in chunkData do
+            print(block)
+            block.Parent = workspace
+        end
+    end)
+end
 
 function BlockMechanics:init()
     BlockService = Knit.GetService("BlockService")
 
     handlePlacing()
     handleBreaking()
+    handleChunkPackets()
     -- spawn(handleUnloading)
 end
 
