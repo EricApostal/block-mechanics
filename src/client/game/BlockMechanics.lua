@@ -114,7 +114,6 @@ local function buildBlock(position, type, parent, id)
         ]]
         block:SetPrimaryPartCFrame(CFrame.new(position))
         for _, part in block:GetChildren() do
-            block:SetAttribute("id", id)
             part.Parent = parent
         end
         block:Destroy()
@@ -127,7 +126,7 @@ local function handleChunkRequests()
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 2
+    local render_distance = 1
     local chunks = {}
     while true do
         local currentX = Character:GetChunk()[1]
@@ -162,13 +161,12 @@ local function handleChunkRequests()
     end
 end
 
-BlockService.UpdateChunk:Connect(function(chunkVec, newChunkData, newChunkBuffer)
+BlockService.UpdateChunk:Connect(function(_, newChunkData, newChunkBuffer)
     print("updating chunk...")
     local change = newChunkData[#newChunkData]
 
     --[[
-        Problem (i think)
-        I think that for some reason it will put the "fake" block on (air), but not take the old block off.
+        For whatever reason I am either looking in or the folder contains chunkdata from the wrong region
     ]]
 
     if change.actionType == "build" then
@@ -178,21 +176,25 @@ BlockService.UpdateChunk:Connect(function(chunkVec, newChunkData, newChunkBuffer
             if block.position == change.position then
                -- Block positions are approximately equal
                -- Perform destruction logic here
-               if chunkVec[1] == -0 then chunkVec[1] = 0 end
-               if chunkVec[2] == -0 then chunkVec[2] = 0 end
-               local blocks = workspace.blocks[chunkVec[1]..","..chunkVec[2]]:GetChildren()
-               print(#blocks)
-               for _, v in ipairs(blocks) do
-                   local id = v:GetAttribute("id")
-                   if id and id == block.id then
-                       print("FOUND!")
-                       v:Destroy()
-                       break  -- Exit the loop once the block is destroyed
-                   end
-                   print(id)
-               end
-               print("Did not find the specified ID in all existing blocks within the chunk.")
-               print(type(block.id))
+                local chunkVec = {math.round(block.position.X/3/16), math.round(block.position.Z/3/16)}
+
+                if chunkVec[1] == -0 then chunkVec[1] = 0 end
+                if chunkVec[2] == -0 then chunkVec[2] = 0 end
+                local blocks = workspace.blocks[chunkVec[1]..","..chunkVec[2]]:GetChildren()
+                print(#blocks)
+                for _, v in ipairs(blocks) do
+                    if v.Position == block.position then
+                        print("FOUND!")
+                        v:Destroy()
+                        break  -- Exit the loop once the block is destroyed
+                    end
+                    print("position: ")
+                    print(v.Position/3)
+                    print("chunk vector")
+                    print(chunkVec)
+                end
+                print("Did not find the specified ID in all existing blocks within the chunk.")
+                print(block.position)
             end
         end
     end

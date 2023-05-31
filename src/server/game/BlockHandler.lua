@@ -24,15 +24,14 @@ function BlockHandler:buildChunk(startX, startZ)
     local scale = 256
     local seed = 126
 
-    for x = (startX*16)*3, (startX*16)*3 + chunkSize*3, 3 do
-        for z = (startZ*16)*3, chunkSize*3 + (startZ*16)*3, 3  do
+    for x = (startX*16)*3, (startX*16)*3 + (chunkSize-1)*3, 3 do
+        for z = (startZ*16)*3, (chunkSize-1)*3 + (startZ*16)*3, 3  do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
             local min, max = 0, scale/2
 
             local blockData = {}
             blockData["position"] = Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z)
             blockData["material"] = "grass"
-            blockData["id"] = HttpService:GenerateGUID(false)
 
             table.insert(chunkData, blockData)
 
