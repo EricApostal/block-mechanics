@@ -8,6 +8,8 @@ local BlockService = Knit.CreateService {
     Name = "BlockService",
     Client = {
         UpdateChunk = Knit.CreateSignal(), -- Create the signal
+        removeBlock = Knit.CreateSignal(),
+        addBlock = Knit.CreateSignal()
     },
 }
 
@@ -16,8 +18,12 @@ local function registerFunctions()
         Data:SetChunk(player, chunkVec, chunkData, buffer)
     end
 
-    function BlockService:BreakBlock(player, block)
-        BlockHandler:breakBlock(block)
+    function BlockService:BreakBlock(player, position)
+        Data:removeBlock(player, position)
+    end
+
+    function BlockService:PlaceBlock(player, position, material)
+        Data:addBlock(player, position, material)
     end
     
     function BlockService:LoadChunk(player, chunk_vec)
@@ -37,6 +43,10 @@ local function registerFunctions()
     function BlockService.Client:BreakBlock(player, block)
         if not block then return end
         BlockService:BreakBlock(player, block)
+    end
+
+    function BlockService.Client:PlaceBlock(player, position, material)
+        BlockService:PlaceBlock(player, position, material)
     end
 
     function BlockService.Client:LoadChunk(player, chunk_vec)

@@ -9,14 +9,6 @@ local HttpService = game:GetService("HttpService")
 
 -- local BlockService = Knit.GetService("BlockService")
 
-function BlockHandler:placeBlock(position, type)
-    
-end
-
-function BlockHandler:breakBlock(block)
-    block:Destroy()
-end
-
 function BlockHandler:buildChunk(startX, startZ)
     local chunkData = {}
 

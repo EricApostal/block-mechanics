@@ -38,6 +38,28 @@ function Data:SetChunk(player, chunkVec, chunkData, chunkBuffer)
     end
 end
 
+function Data:removeBlock(player, position)
+    --[[
+        WARNING: THIS WILL MESS STUFF UP REALLY BAD
+
+        Right now this doesn't update the server chunk state AT ALL! VERY BAD!
+    ]]
+    for _, plr in Players:GetPlayers() do
+        BlockService.Client.removeBlock:Fire(plr, position)
+    end
+end
+
+function Data:addBlock(player, position, material)
+    --[[
+        WARNING: THIS WILL MESS STUFF UP REALLY BAD
+
+        Right now this doesn't update the server chunk state AT ALL! VERY BAD!
+    ]]
+    for _, plr in Players:GetPlayers() do
+        BlockService.Client.addBlock:Fire(plr, position, material)
+    end 
+end
+
 function Data:init()
     BlockService = Knit.GetService("BlockService")
 end
