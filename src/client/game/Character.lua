@@ -37,7 +37,7 @@ end
 
 function Character:GetChunk()
     local pos = Character:GetPosition()/16
-    local vec = { math.round(pos.X) , math.round(pos.Z)}
+    local vec = Vector2.new(math.round(pos.X) , math.round(pos.Z))
     return vec
 end
 

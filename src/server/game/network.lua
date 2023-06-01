@@ -14,10 +14,6 @@ local BlockService = Knit.CreateService {
 }
 
 local function registerFunctions()
-    function BlockService:SetChunk(player, chunkVec, chunkData, buffer)
-        Data:SetChunk(player, chunkVec, chunkData, buffer)
-    end
-
     function BlockService:BreakBlock(player, position)
         Data:removeBlock(player, position)
     end

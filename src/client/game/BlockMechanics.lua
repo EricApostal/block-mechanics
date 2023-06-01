@@ -2,7 +2,6 @@ local BlockMechanics = {}
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CollectionService = game:GetService("CollectionService")
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Data = require(script.Parent.Data)
@@ -41,7 +40,7 @@ local function handlePlacing()
             placeBlock( Vector3.new(mouse.Target.Position.X, mouse.Target.Position.Y, mouse.Target.Position.Z+3), "oak_log" )
         end
     end)
-    
+
     mouse.Button2Up:Connect(function()
         lastClickUp = true
     end)
@@ -69,14 +68,14 @@ local function handleChunkRequests()
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 6
+    local render_distance = 2
     local chunks = {}
     while true do
-        local currentX = Character:GetChunk()[1]
-        local currentZ = Character:GetChunk()[2]
+        local currentX = Character:GetChunk().X
+        local currentZ = Character:GetChunk().Y
         for x = currentX-(render_distance), currentX+(render_distance)-1 do
             for z = currentZ-(render_distance), currentZ+(render_distance)-1 do
-                table.insert(chunks, {x, z})
+                table.insert(chunks, Vector2.new(x, z))
             end
         end
 
@@ -84,7 +83,7 @@ local function handleChunkRequests()
             if Data:IsChunkLoaded(v) then
                 continue
             end
-
+            
             BlockService:LoadChunk(v):andThen(function(blocks) 
                 Data:RegisterChunk(v, blocks)
                 for _, block in blocks do
@@ -93,14 +92,17 @@ local function handleChunkRequests()
             end)
             wait()
         end
+
         chunks = {}
         task.wait(1)
     end
 end
 
 BlockService.removeBlock:Connect(function(position)
-    local block = workspace:GetPartBoundsInBox(CFrame.new(position), Vector3.new(0,0,0))[1]
-    if not block then return end
+    local block = workspace:GetPartBoundsInBox(CFrame.new(position), Vector3.new(1,1,1))[1]
+    if not block then
+        return
+    end
     block:Destroy()
 end)
 

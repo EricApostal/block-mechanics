@@ -3,31 +3,20 @@ local Data = {}
 local cachedWorldData = {}
 
 function Data:IsChunkLoaded(chunkKey)
-    -- return cachedWorldData[chunkKey] ~= nil -- not a good long term solution
-    for key, chunkData in cachedWorldData do
-        -- print(key)
-        -- print(chunkKey)
-        if key[1] == chunkKey[1] and key[2] == chunkKey[2] then
-            return true
-        end
+    local chunkData = cachedWorldData[chunkKey.X..","..chunkKey.Y]
+    if chunkData == nil then
+        return false
     end
-    return false
+    return true
 end
 
 function Data:RegisterChunk(chunkKey, data)
-    cachedWorldData[chunkKey] = data -- data == blocks
+    cachedWorldData[chunkKey.X..","..chunkKey.Y] = data -- data == blocks
 end
 
 function Data:GetChunkData(chunkKey)
-    for key, chunkData in cachedWorldData do
-        -- print(key)
-        -- print(chunkKey)
-        if key[1] == chunkKey[1] and key[2] == chunkKey[2] then
-            return chunkData
-        end
-    end
-    print("IS STILL NIL")
-    return nil
+    local chunkData = cachedWorldData[chunkKey.X..","..chunkKey.Y]
+    return chunkData
 end
 
 function Data:init()
