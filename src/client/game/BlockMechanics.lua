@@ -68,7 +68,7 @@ local function handleChunkRequests()
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 2
+    local render_distance = 1
     local chunks = {}
     while true do
         local currentX = Character:GetChunk().X

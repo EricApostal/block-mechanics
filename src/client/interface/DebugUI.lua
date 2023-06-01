@@ -10,14 +10,17 @@ local Value, Observer, Computed, ForKeys, ForValues, ForPairs, new, Children, On
 
 local debug_toggled = false
 local Position = Value("")
+local Chunk = Value("")
 
 local function updatePos()
-    coroutine.wrap(function() 
+    task.spawn(function() 
         while task.wait() do
             local pos = localplayer.Character:FindFirstChild("HumanoidRootPart").Position
             Position:set( math.round(pos.X * (10/3))/10 .. ", " .. math.round(pos.Y * (10/3))/10 .. ", " .. math.round(pos.Z * (10/3))/10 )
+
+            Chunk:set( math.round((pos.X/3-8)/16) ..",".. math.round((pos.Z/3-8)/16) )
         end
-    end)()
+    end)
 end
 
 function DebugUI:init()
@@ -25,7 +28,7 @@ function DebugUI:init()
     local main_ui = new "Frame" {
         Position = UDim2.fromOffset(0, 0),
         AnchorPoint = Vector2.new(0, 0),
-        Size = UDim2.fromOffset(200, 40),
+        Size = UDim2.fromOffset(200, 80),
         BackgroundColor3 = Color3.new(0.3058823529411765, 0.3254901960784314, 0.34509803921568627),
     
         [Children] = {
@@ -39,8 +42,17 @@ function DebugUI:init()
                 Size = UDim2.fromScale(1, 1),
                 TextColor = BrickColor.White(),
                 TextSize = 18,
+                FontFace  = Font.fromName("RobotoMono"),
+
+            }, new "TextLabel" {
+                Text = Chunk,
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(0, 20),
+                Size = UDim2.fromScale(1, 1),
+                TextColor = BrickColor.White(),
+                TextSize = 18,
                 FontFace  = Font.fromName("RobotoMono")
-            }
+            },
             
         }
     }

@@ -3,6 +3,8 @@ local Data = {}
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Players = game:GetService("Players")
 local BlockHandler = require(script.Parent.BlockHandler)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BlockMap = require(ReplicatedStorage.Common.BlockMap)
 
 local cachedWorldData = {}
 
@@ -54,8 +56,9 @@ function Data:removeBlock(player, position)
 end
 
 function Data:addBlock(player, position, material)
-    local pos = position/3/16
-    local chunk = Vector2.new(math.round(pos.X), math.round(pos.Z))
+    -- local pos = position/3/16
+    local pos = BlockMap:getChunk(position)
+    local chunk = Vector2.new(math.round(pos.X), math.round(pos.Y))
 
     local blockData = {
         ["position"] = position,

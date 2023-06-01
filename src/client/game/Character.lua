@@ -2,6 +2,10 @@ local Character = {}
 
 local Players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local BlockMap = require(ReplicatedStorage.Common.BlockMap)
+
 local camera = workspace.CurrentCamera
 
 local player = Players.LocalPlayer
@@ -32,7 +36,8 @@ function Character:GetRootPart()
 end
 
 function Character:GetPosition()
-    return Character:GetRootPart().Position/3
+    -- return Character:GetRootPart().Position/3
+    return BlockMap:getPos(Character:GetRootPart().Position)
 end
 
 function Character:GetChunk()
