@@ -47,7 +47,7 @@ function Data:removeBlock(player: Instance, position: Vector3)
     local pos = BlockMap:getChunk(position)
     local chunk = Vector2.new(math.round(pos.X), math.round(pos.Y))
 
-    if not cachedWorldData[chunk.X..","..chunk.Y] then cachedWorldData[chunk.X..","..chunk.Y] = {} end
+    if not cachedWorldData[chunk.X..","..chunk.Y] then return end
     cachedWorldData[chunk.X..","..chunk.Y][position.X..","..position.Y] = nil
 
     for _, plr in Players:GetPlayers() do
@@ -66,9 +66,7 @@ function Data:addBlock(player: Instance, position:Vector3, material: string)
         ["material"] = material
     }
 
-    -- if not cachedWorldData[chunk.X..","..chunk.Y] then cachedWorldData[chunk.X..","..chunk.Y] = {} end
     if not cachedWorldData[chunk.X..","..chunk.Y] then
-        print("tried to place into unloaded chunk...")
         return
     end
     table.insert(cachedWorldData[chunk.X..","..chunk.Y], blockData)

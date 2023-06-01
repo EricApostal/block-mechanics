@@ -1,5 +1,3 @@
---!strict
-
 local BlockMechanics = {}
 
 local Players = game:GetService("Players")
@@ -70,31 +68,52 @@ local function handleChunkRequests()
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 6
+    local render_distance = 4
     local chunks = {}
     while true do
-        local currentX = Character:GetChunk().X
-        local currentZ = Character:GetChunk().Y
+        local currentX: number = Character:GetChunk().X
+        local currentZ: number = Character:GetChunk().Y
         for x = currentX-(render_distance), currentX+(render_distance)-1 do
             for z = currentZ-(render_distance), currentZ+(render_distance)-1 do
                 table.insert(chunks, Vector2.new(x, z))
             end
         end
 
+        --task.spawn(function()
+            for key, chunk in Data:GetLoadedChunks() do
+
+                -- terrible I know, but it's the best I can do rn
+                local newKey = string.split(key, ",")
+                local keyVec = Vector2.new(newKey[1], newKey[2])
+
+                if not table.find(chunks, keyVec) then
+
+                    -- chunk is out of bounds, yoink it
+                    for _, block in next, chunk do
+                        local blockInst = workspace:GetPartBoundsInBox(CFrame.new(block["position"]), Vector3.new(1,1,1))[1]
+                        if not blockInst then continue end
+                        blockInst:Destroy()
+                        Data:RemoveChunk(keyVec)
+                    end
+                    wait()
+                end
+            end
+        --end)
+
         for _,v in chunks do
             if Data:IsChunkLoaded(v) then
                 continue
             end
-            
+
             BlockService:LoadChunk(v):andThen(function(blocks) 
                 Data:RegisterChunk(v, blocks)
-                for _, block in blocks do
+                for _, block in next, blocks do
                     buildBlock(block["position"], block["material"], workspace.blocks)
                 end
             end)
             wait(.1)
         end
-
+        
         chunks = {}
         task.wait(1)
     end
@@ -105,6 +124,7 @@ BlockService.removeBlock:Connect(function(position: Vector3)
     if not block then
         return
     end
+    Data:UnregisterBlock(position)
     block:Destroy()
 end)
 
@@ -112,6 +132,7 @@ BlockService.addBlock:Connect(function(position: Vector3, material: string)
     local block = ReplicatedStorage.blocks[material]:Clone()
     block.Position = position
     block.Parent = workspace.blocks
+    Data:RegisterBlock(position, material)
 end)
 
 function BlockMechanics:init()

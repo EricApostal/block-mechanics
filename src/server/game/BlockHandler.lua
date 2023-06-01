@@ -2,14 +2,7 @@
 
 local BlockHandler = {}
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CollectionService = game:GetService("CollectionService")
-local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-
-local HttpService = game:GetService("HttpService")
-
--- local BlockService = Knit.GetService("BlockService")
 
 local function getModel(model: string, position: Vector3)
     local m = ReplicatedStorage.models[model]:Clone()
@@ -28,13 +21,13 @@ function BlockHandler:buildChunk(startX: number, startZ: number)
     local chunkData = {}
 
     local chunkSize = 16
-    local scale = 256
-    local seed = 126
+    local scale = 300
+    local seed = 126 -- math.random(100, 999)
 
     for x = (startX*16)*3, (startX*16)*3 + (chunkSize-1)*3, 3 do
         for z = (startZ*16)*3, (chunkSize-1)*3 + (startZ*16)*3, 3  do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
-            local min, max = 0, scale/2
+            local min, max = 0, scale
 
             local blockData = {}
             blockData["position"] = Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z)
