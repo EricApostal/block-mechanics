@@ -68,7 +68,7 @@ local function handleChunkRequests()
         This will need some sort of system to find the chunk radius at which you need loaded
     ]]
 
-    local render_distance = 4
+    local render_distance = 5
     local chunks = {}
     while true do
         local currentX: number = Character:GetChunk().X
@@ -95,7 +95,7 @@ local function handleChunkRequests()
                         blockInst:Destroy()
                         Data:RemoveChunk(keyVec)
                     end
-                    wait()
+                    task.wait()
                 end
             end
         --end)
