@@ -1,3 +1,5 @@
+--!strict
+
 local blockMap = {}
 --[[
     Standardized module to map roblox coordinates to voxel coordinates

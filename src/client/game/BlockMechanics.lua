@@ -1,3 +1,5 @@
+--!strict
+
 local BlockMechanics = {}
 
 local Players = game:GetService("Players")
@@ -11,11 +13,11 @@ local player = Players.LocalPlayer -- 17.268
 local mouse = player:GetMouse()
 local BlockService = Knit.GetService("BlockService")
 
-local function placeBlock(position, material)
+local function placeBlock(position: Vector3, material: string)
     BlockService:PlaceBlock(position, material)
 end
 
-local function destroyBlock(position)
+local function destroyBlock(position: Vector3)
     BlockService:BreakBlock(position)
 end
 
@@ -53,7 +55,7 @@ local function handleBreaking()
     end)
 end
 
-local function buildBlock(position, type, parent)
+local function buildBlock(position: Vector3, type:string, parent:Instance)
     local block = ReplicatedStorage.blocks:WaitForChild(type):Clone()
     block.Parent = parent -- workspace.blocks
     if block:IsA("BasePart") then
@@ -98,7 +100,7 @@ local function handleChunkRequests()
     end
 end
 
-BlockService.removeBlock:Connect(function(position)
+BlockService.removeBlock:Connect(function(position: Vector3)
     local block = workspace:GetPartBoundsInBox(CFrame.new(position), Vector3.new(1,1,1))[1]
     if not block then
         return
@@ -106,7 +108,7 @@ BlockService.removeBlock:Connect(function(position)
     block:Destroy()
 end)
 
-BlockService.addBlock:Connect(function(position, material)
+BlockService.addBlock:Connect(function(position: Vector3, material: string)
     local block = ReplicatedStorage.blocks[material]:Clone()
     block.Position = position
     block.Parent = workspace.blocks

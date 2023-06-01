@@ -1,3 +1,5 @@
+--!strict
+
 local Character = {}
 
 local Players = game:GetService("Players")

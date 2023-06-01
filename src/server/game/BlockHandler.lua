@@ -1,3 +1,5 @@
+--!strict
+
 local BlockHandler = {}
 
 local Players = game:GetService("Players")
@@ -9,7 +11,7 @@ local HttpService = game:GetService("HttpService")
 
 -- local BlockService = Knit.GetService("BlockService")
 
-local function getModel(model, position)
+local function getModel(model: string, position: Vector3)
     local m = ReplicatedStorage.models[model]:Clone()
     m:SetPrimaryPartCFrame( CFrame.new(position) )
 
@@ -22,7 +24,7 @@ local function getModel(model, position)
     return blocks;
 end
 
-function BlockHandler:buildChunk(startX, startZ)
+function BlockHandler:buildChunk(startX: number, startZ: number)
     local chunkData = {}
 
     local chunkSize = 16

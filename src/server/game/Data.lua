@@ -10,12 +10,12 @@ local cachedWorldData = {}
 
 local BlockService
 
-function Data:GetChunkData(chunkKey)
+function Data:GetChunkData(chunkKey: Vector2)
     local chunkData = cachedWorldData[chunkKey.X..","..chunkKey.Y]
     return chunkData
 end
 
-function Data:LoadChunk(player, chunkKey)
+function Data:LoadChunk(player: Instance, chunkKey: Vector2)
     -- local BlockService = Knit.GetService("BlockService")
     -- Hopefully I can make the type of chunkKey a vector2
     local chunkData = Data:GetChunkData(chunkKey)
@@ -36,14 +36,14 @@ When working on updating the chunk for everyone, fire the clients with the updat
 but do another check (like the chunk update) to see what blocks actually need to be re-rendered
 ]]
 
-function Data:SetChunk(player, chunk, data)
+function Data:SetChunk(player: Instance, chunk: Vector2, data)
     -- cachedWorldData[chunk] = data -- I should verify it's in the array... maybe it's fine
     -- for _, plr in Players:GetPlayers() do
     --     BlockService.Client.UpdateChunk:Fire(plr, chunk, data)
     -- end
 end
 
-function Data:removeBlock(player, position)
+function Data:removeBlock(player: Instance, position: Vector3)
     local pos = BlockMap:getChunk(position)
     local chunk = Vector2.new(math.round(pos.X), math.round(pos.Y))
 
@@ -56,7 +56,7 @@ function Data:removeBlock(player, position)
     end
 end
 
-function Data:addBlock(player, position, material)
+function Data:addBlock(player: Instance, position:Vector3, material: string)
     -- local pos = position/3/16
     local pos = BlockMap:getChunk(position)
     local chunk = Vector2.new(math.round(pos.X), math.round(pos.Y))
