@@ -44,13 +44,14 @@ function Data:SetChunk(player, chunk, data)
 end
 
 function Data:removeBlock(player, position)
-    local pos = position/16
-    local chunk = Vector3.new(math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
+    local pos = BlockMap:getChunk(position)
+    local chunk = Vector2.new(math.round(pos.X), math.round(pos.Y))
 
     if not cachedWorldData[chunk.X..","..chunk.Y] then cachedWorldData[chunk.X..","..chunk.Y] = {} end
     cachedWorldData[chunk.X..","..chunk.Y][position.X..","..position.Y] = nil
 
     for _, plr in Players:GetPlayers() do
+        -- TODO: send material to validate state. If client state doesn't match, reload chunk
         BlockService.Client.removeBlock:Fire(plr, position)
     end
 end

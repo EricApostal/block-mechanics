@@ -9,6 +9,19 @@ local HttpService = game:GetService("HttpService")
 
 -- local BlockService = Knit.GetService("BlockService")
 
+local function getModel(model, position)
+    local m = ReplicatedStorage.models[model]:Clone()
+    m:SetPrimaryPartCFrame( CFrame.new(position) )
+
+    local blocks = {}
+    for _,part in m:GetChildren() do
+        table.insert(blocks, part)
+    end
+    m:Destroy()
+
+    return blocks;
+end
+
 function BlockHandler:buildChunk(startX, startZ)
     local chunkData = {}
 
@@ -24,6 +37,17 @@ function BlockHandler:buildChunk(startX, startZ)
             local blockData = {}
             blockData["position"] = Vector3.new(x, math.round( (min+(max-min)*y)/3)*3, z)
             blockData["material"] = "grass"
+
+            -- shitty tree spawn
+            if math.random(1,50) == 1 then
+                local treeParts = getModel("tree", Vector3.new(x, math.round( ((min+(max-min)*y)+3)/3)*3, z))
+                for _,partInstance in treeParts do
+                    local treeData = {}
+                    treeData["position"] = partInstance.Position
+                    treeData["material"] = partInstance.Name
+                    table.insert(chunkData, treeData)
+                end
+            end
 
             table.insert(chunkData, blockData)
         end
