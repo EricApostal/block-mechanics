@@ -2,7 +2,6 @@ local ChunkReplicator = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-Knit.Start():catch(warn):await()
 local BlockService = Knit.GetService("BlockService")
 local Block = require(ReplicatedStorage.Common.blocks.Block)
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
@@ -10,7 +9,7 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 
 -- Actually create the blocks from WorldData.
 -- There should be a different function for chunks and individual blocks.
-local function drawChanges()
+local function drawChunk(hash)
     for chunkHash, chunk in pairs(WorldData) do
         for blockHash, block in pairs(chunk.blocks) do
             local instance = ReplicatedStorage.blocks[block.texture]:Clone()
@@ -26,7 +25,7 @@ local function listener()
         local blockInstance = Block:new(table.unpack(block))
         WorldBuilder:AddBlock(blockInstance)
         print("drawing changes!")
-        drawChanges()
+        drawChunks()
     end)
 end
 
