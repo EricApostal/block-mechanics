@@ -10,9 +10,9 @@ function blockMap:getPos(rblxPos: Vector3)
     return pos
 end
 
-function blockMap:getChunk(chunkPos: Vector3)
+function blockMap:getChunk(chunkPos: Vector2)
     -- TODO: Handle if a Vector2 is passed
-    local pos = Vector2.new(math.round( ((chunkPos.X/3) -8 )/16) , math.round( ((chunkPos.Z/3) -8 )/16))
+    local pos = Vector2.new(math.round( ((chunkPos.X/3) -8 )/16) , math.round( ((chunkPos.Y/3) -8 )/16))
     return pos
 end
 

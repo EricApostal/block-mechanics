@@ -7,7 +7,7 @@ local UiHandler = require(script.interface.UiHandler)
 
 UiHandler:init()
 
-BlockService.addBlock:Connect(function(block)
+BlockService.AddBlock:Connect(function(block)
     print("block added")
     print(block)
 end)

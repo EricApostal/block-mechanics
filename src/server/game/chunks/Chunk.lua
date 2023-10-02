@@ -1,8 +1,4 @@
---!strict
-
 -- Creates a chunk class.
-
-
 
 Chunk = {
     position = Vector2.new(0, 0)
@@ -18,7 +14,8 @@ function Chunk:new(position: Vector2)
     self.position = position
     self.hash = string.format("%s,%s", position.X, position.Y)
 
-
+    print("chunk being made")
+    print(self.hash)
     return o
 end
 
@@ -32,6 +29,7 @@ function Chunk:AddBlock(block)
         print("New block being placed, adding to table!")
         self.blocks[hash] = block
     end
+    print(self.blocks)
 end
 
 -- Removes block by block object.

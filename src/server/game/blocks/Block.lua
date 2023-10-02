@@ -1,4 +1,3 @@
-
 --[[
     Creates a block class.
 ]]
