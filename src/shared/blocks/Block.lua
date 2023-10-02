@@ -2,8 +2,6 @@
     Creates a block class.
 ]]
 
-local WorldBuilder = require(script.Parent.Parent.world.WorldBuilder)
-
 Block = {
     position = Vector3.new(0, 0, 0),
     texture = "stone",
@@ -24,10 +22,8 @@ function Block:new(position: Vector3, texture: string, breakTimes: number)
     self.breakTimes = breakTimes
 
     if (texture == nil) then
-        error("ERROR: Block was created by no texture was defined.")
+        error("ERROR: Block was created but no texture was defined.")
     end
-
-    WorldBuilder:AddBlock(self)
 
     return obj
 end

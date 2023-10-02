@@ -6,7 +6,8 @@
 
 local WorldBuilder = {}
 
-local Chunk = require(script.Parent.Parent.chunks.Chunk)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Chunk = require(ReplicatedStorage.Common.chunks.Chunk)
 local WorldData = require(script.Parent.WorldData)
 
 -- Calculates correct chunk to place block into, then places via WorldData.
