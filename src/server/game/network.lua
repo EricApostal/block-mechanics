@@ -1,57 +1,51 @@
 local Network = {}
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-local Data = require(script.Parent.Data)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local WorldBuilder = require(script.Parent.world.WorldBuilder)
+local Block = require(ReplicatedStorage.Common.blocks.Block)
 
 local BlockService = Knit.CreateService {
     Name = "BlockService",
     Client = {
         UpdateChunk = Knit.CreateSignal(), -- Create the signal
-        removeBlock = Knit.CreateSignal(),
-        addBlock = Knit.CreateSignal()
+        RemoveBlock = Knit.CreateSignal(),
+        AddBlock = Knit.CreateSignal()
     },
 }
 
 local function registerFunctions()
-    function BlockService:BreakBlock(player, position)
-        Data:removeBlock(player, position)
+    --// Server Functions \\--
+    function BlockService:BreakBlock(player, block)
+        return WorldBuilder:RemoveBlock(block)
     end
 
-    function BlockService:PlaceBlock(player, position, material)
-        Data:addBlock(player, position, material)
-    end
-    
-    function BlockService:LoadChunk(player, chunk_vec)
-        return Data:LoadChunk(player, chunk_vec) -- BlockHandler:buildChunk(chunk_vec.X, chunk_vec.Y)
+    function BlockService:PlaceBlock(player, block)
+        return WorldBuilder:AddBlock(block)
     end
 
-    --[[
-        Client Functions :D
+    -- Note: I am using namings like "Break" and "Place" because adding / removing *could* have a different meaning.
 
-        Because of the way knit is structured it's ideal for handling bad or malicious requests
-    ]]
-
-    function BlockService.Client:SetChunk(player, chunkVec, chunkData)
-        Data:SetChunk(player, chunkVec, chunkData)
+    --// Client Functions \\--
+    function BlockService.Client:GetChunk(player, chunkHash)
+        return WorldBuilder:GetChunk(chunkHash)
     end
 
-    function BlockService.Client:BreakBlock(player, block)
-        if not block then return end
-        BlockService:BreakBlock(player, block)
-    end
-
-    function BlockService.Client:PlaceBlock(player, position, material)
-        BlockService:PlaceBlock(player, position, material)
-    end
-
-    function BlockService.Client:LoadChunk(player, chunk_vec)
-        return BlockService:LoadChunk(player, chunk_vec)
+    function BlockService.Client:PlaceBlock(player, block)
+        return WorldBuilder:AddBlock(block)
     end
 
 end
 
-function Network:init() 
+function Network:init()
     registerFunctions()
+    Players.PlayerAdded:Connect(function(player)
+        local block = Block:new(Vector3.new(1,1,1), "grass")
+        WorldBuilder:AddBlock(block)
+        BlockService.Client.AddBlock:Fire(player, block:serialize())
+    end)
 end
+
 
 return Network

@@ -28,4 +28,13 @@ function WorldBuilder:RemoveBlock(block)
 
 end
 
+function WorldBuilder:GetChunk(hash: string)
+    local data = WorldData[hash]
+    if (data == nil) then
+        print(string.format("Generating chunk %s", hash))
+        -- GENERATE CHUNK HERE
+    end
+    return data
+end
+
 return WorldBuilder

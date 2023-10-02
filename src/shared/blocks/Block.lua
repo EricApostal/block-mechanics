@@ -2,6 +2,8 @@
     Creates a block class.
 ]]
 
+local BlockMap = require(script.Parent.Parent.BlockMap)
+
 Block = {
     position = Vector3.new(0, 0, 0),
     texture = "stone",
@@ -10,9 +12,7 @@ Block = {
     }
 }
 
---[[
-    Makes a new block.
-]]
+-- Makes a new block.
 function Block:new(position: Vector3, texture: string, breakTimes: number)
     local obj = {}
     setmetatable(obj, self)
@@ -30,9 +30,8 @@ end
 
 -- Move block by converting Roblox coordinates to Voxel coordinates.
 function Block:moveTo(position: Vector3)
-    -- TODO: Perhaps make a RBLX -> Voxel conversion module?
-    local robloxPosition = Vector3.new(position.X*3, position.Y*3, position.Z*3)
-    self.instance.Position = robloxPosition
+    -- This may just not work
+    local robloxPosition = BlockMap:getPos(position)
 end
 
 -- Get the X,Y,Z hash of the block
@@ -43,11 +42,7 @@ end
 
 -- Serialize so we can pass over the network.
 function Block:serialize()
-    return {
-        ['position'] = self.position,
-        ['texture'] = self.texture,
-        ['breakTimes'] = self.breakTimes
-    }
+    return {self.position, self.texture, self.breakTimes}
 end
 
 return Block

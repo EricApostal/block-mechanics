@@ -14,8 +14,6 @@ function Chunk:new(position: Vector2)
     self.position = position
     self.hash = string.format("%s,%s", position.X, position.Y)
 
-    print("chunk being made")
-    print(self.hash)
     return o
 end
 
