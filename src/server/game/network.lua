@@ -3,7 +3,7 @@ local Network = {}
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
-local WorldBuilder = require(script.Parent.world.WorldBuilder)
+local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local Block = require(ReplicatedStorage.Common.blocks.Block)
 
 local BlockService = Knit.CreateService {

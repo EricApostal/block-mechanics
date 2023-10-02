@@ -14,6 +14,12 @@ function Chunk:new(position: Vector2)
     self.position = position
     self.hash = string.format("%s,%s", position.X, position.Y)
 
+    if (game:GetService("RunService"):IsClient() ) then
+        self.instance = Instance.new("Folder")
+        self.instance.Name = self.hash
+        self.instance.Parent = workspace.blocks
+    end
+
     return o
 end
 

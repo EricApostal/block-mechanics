@@ -1,7 +1,7 @@
 --!strict
 
 --[[
-    Handles routing for blocks across the entire world.
+    Handles routing for blocks across the entire world, or client based on the context from which this file is being run.
 ]]
 
 local WorldBuilder = {}
@@ -12,15 +12,18 @@ local WorldData = require(script.Parent.WorldData)
 
 -- Calculates correct chunk to place block into, then places via WorldData.
 function WorldBuilder:AddBlock(block)
-    local position = Vector2.new(math.floor(block.position.X/16), math.floor(block.position.X/16))
-    local index = string.format("%s,%s", position.X, position.Y)
+    -- "position" is already converted, thus there's no need to put it through blockmap.
+    local chunk = Vector2.new(math.floor(block.position.X/16), math.floor(block.position.Y/16))
+    local chunkIndex = string.format("%s,%s", chunk.X, chunk.Y)
 
-    if (WorldData[index] == nil) then
+    -- Create chunk, it doesn't exist yet
+    if (WorldData[chunkIndex] == nil) then
         print("chunk doesn't exist yet, creating...")
-        -- Create chunk, it doesn't exist yet
-        WorldData[index] = Chunk:new(position)
+        WorldData[chunkIndex] = Chunk:new(chunk)
     end
-    WorldData[index]:AddBlock(block)
+
+    -- Add block to chunk index.
+    WorldData[chunkIndex]:AddBlock(block)
 end
 
 -- Calculates target chunk containing block, then removes via WorldData.
