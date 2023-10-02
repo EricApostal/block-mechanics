@@ -10,10 +10,6 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 -- Actually create the blocks from WorldData.
 -- There should be a different function for chunks and individual blocks.
 local function drawChunk(hash)
-    print("chunk:")
-    print(hash)
-    print("world data: ")
-    print(WorldData)
     local chunk = WorldData[hash]
     for blockHash, block in pairs(chunk.blocks) do
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
@@ -24,11 +20,14 @@ local function drawChunk(hash)
 end
 
 local function listener()
-    BlockService.AddBlock:Connect(function(blockArray)
+    BlockService.onBlockAdded:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
         WorldBuilder:AddBlock(block)
-        print("drawing changes!")
+        print(string.format("Placing block at %s", tostring(block.position)))
         drawChunk(block:getChunkHash())
+    end)
+    BlockService.onBlockRemoved:Connect(function(blockArray)
+        print("do block removal thing")
     end)
 end
 

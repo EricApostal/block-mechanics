@@ -28,7 +28,7 @@ end
 
 -- Calculates target chunk containing block, then removes via WorldData.
 function WorldBuilder:RemoveBlock(block)
-
+    print(string.format("Removing block at %s", tostring(block.position)))
 end
 
 function WorldBuilder:GetChunk(hash: string)
