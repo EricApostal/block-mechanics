@@ -16,28 +16,21 @@ Block = {
 --[[
     Makes a new block.
 ]]
-function Block:new(o, position: Vector3, texture: string, breakTimes: number)
-    o = o or {}
-    setmetatable(o, self)
+function Block:new(position: Vector3, texture: string, breakTimes: number)
+    local obj = {}
+    setmetatable(obj, self)
     self.__index = self
     self.position = position
     self.texture = texture
+    self.breakTimes = breakTimes
 
     if (texture == nil) then
         error("ERROR: Block was created by no texture was defined.")
     end
 
-    local function createBlock()
-        -- make new instance
-        local block = game:GetService("ReplicatedStorage"):WaitForChild("blocks"):WaitForChild(texture):Clone()
-        self.instance = block
+    WorldBuilder:AddBlock(self)
 
-        -- We want to pass this object into the chunk.
-        WorldBuilder:AddBlock(self)
-    end
-    createBlock()
-
-    return o
+    return obj
 end
 
 -- Move block by converting Roblox coordinates to Voxel coordinates.
@@ -52,3 +45,14 @@ function Block:getHash(): string
     local hash = string.format("%s,%s,%s", self.position.X, self.position.Y, self.position.Z)
     return hash
 end
+
+-- Serialize so we can pass over the network.
+function Block:serialize()
+    return {
+        ['position'] = self.position,
+        ['texture'] = self.texture,
+        ['breakTimes'] = self.breakTimes
+    }
+end
+
+return Block

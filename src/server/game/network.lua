@@ -1,7 +1,6 @@
-local network = {}
+local Network = {}
 
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-local BlockHandler = require(script.Parent.BlockHandler)
 local Data = require(script.Parent.Data)
 
 local BlockService = Knit.CreateService {
@@ -51,8 +50,8 @@ local function registerFunctions()
 
 end
 
-function network:init() 
+function Network:init() 
     registerFunctions()
 end
 
-return network
+return Network

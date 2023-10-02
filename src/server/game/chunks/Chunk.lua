@@ -2,6 +2,8 @@
 
 -- Creates a chunk class.
 
+
+
 Chunk = {
     position = Vector2.new(0, 0)
 }
