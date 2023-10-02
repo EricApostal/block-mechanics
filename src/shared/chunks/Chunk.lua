@@ -33,7 +33,6 @@ function Chunk:AddBlock(block)
         print("New block being placed, adding to table!")
         self.blocks[hash] = block
     end
-    print(self.blocks)
 end
 
 -- Removes block by block object.

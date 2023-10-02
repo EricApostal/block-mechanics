@@ -34,15 +34,25 @@ function Block:moveTo(position: Vector3)
     local robloxPosition = BlockMap:getPos(position)
 end
 
+function Block:getChunk(): Vector2
+    return BlockMap:getChunk(self.position)
+end
+
 -- Get the X,Y,Z hash of the block
 function Block:getHash(): string
     local hash = string.format("%s,%s,%s", self.position.X, self.position.Y, self.position.Z)
     return hash
 end
 
+-- Get the hash of the current chunk
+function Block:getChunkHash():string
+    local hash = string.format("%s,%s", self:getChunk().X, self:getChunk().Y)
+    return hash
+end
+
 -- Serialize so we can pass over the network.
 function Block:serialize()
-    return {self.position, self.texture, self.breakTimes}
+    return {self.position, self.texture, self.breakTimes, self.chunk}
 end
 
 return Block

@@ -13,12 +13,12 @@ local WorldData = require(script.Parent.WorldData)
 -- Calculates correct chunk to place block into, then places via WorldData.
 function WorldBuilder:AddBlock(block)
     -- "position" is already converted, thus there's no need to put it through blockmap.
-    local chunk = Vector2.new(math.floor(block.position.X/16), math.floor(block.position.Y/16))
+    local chunk = block:getChunk()
     local chunkIndex = string.format("%s,%s", chunk.X, chunk.Y)
 
     -- Create chunk, it doesn't exist yet
     if (WorldData[chunkIndex] == nil) then
-        print("chunk doesn't exist yet, creating...")
+        print(string.format("Creating chunk %s", chunkIndex))
         WorldData[chunkIndex] = Chunk:new(chunk)
     end
 
@@ -33,6 +33,9 @@ end
 
 function WorldBuilder:GetChunk(hash: string)
     local data = WorldData[hash]
+    --[[
+        If nil then call get chunk via knit (so we can handle both the client and the server).
+    ]]
     if (data == nil) then
         print(string.format("Generating chunk %s", hash))
         -- GENERATE CHUNK HERE

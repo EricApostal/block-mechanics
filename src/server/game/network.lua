@@ -41,7 +41,7 @@ end
 function Network:init()
     registerFunctions()
     Players.PlayerAdded:Connect(function(player)
-        local block = Block:new(Vector3.new(0,0,0), "grass")
+        local block = Block:new(Vector3.new(1,0,1), "grass")
         WorldBuilder:AddBlock(block)
         BlockService.Client.AddBlock:Fire(player, block:serialize())
     end)
