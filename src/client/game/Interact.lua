@@ -18,13 +18,6 @@ local function handleBreaking()
         local chunk = WorldData[chunkHash]
         local block = chunk.blocks[blockHash]
 
-        print("serialized: ")
-        print(block:serialize())
-        print("raw position")
-        print(block.position)
-        print("blocks: ")
-        print(chunk.blocks)
-
         BlockService:BreakBlock(block:serialize())
     end)
 end

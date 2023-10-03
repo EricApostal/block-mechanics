@@ -36,7 +36,18 @@ end
 
 -- Get the X,Y,Z hash of the block
 function Block:getHash()
-    return string.format("%s,%s,%s", self.position.X, self.position.Y, self.position.Z)
+    local position = table.clone({X = self.position.X, Y = self.position.Y, Z = self.position.Z})
+    if position.X == -0 then
+        position.X = 0
+    end
+    if position.Y == -0 then
+        position.Y = 0
+    end
+    if position.Z == -0 then
+        position.Z = 0
+    end
+    print("GOT BLOCCK HASH!")
+    return string.format("%s,%s,%s", position.X, position.Y, position.Z)
 end
 
 -- Get the hash of the current chunk

@@ -15,8 +15,14 @@ end
 
 function blockMap:getChunk(chunkPos: Vector2)
     -- TODO: Handle if a Vector2 is passed
-    local pos = Vector2.new(math.round( ((chunkPos.X/3) -8 )/16) , math.round( ((chunkPos.Y/3) -8 )/16))
-    return pos
+    local pos = {X = math.round( ((chunkPos.X/3) -8 )/16) , Y = math.round( ((chunkPos.Y/3) -8 )/16)}
+    if pos.X == -0 then
+        pos.X = 0
+    end
+    if pos.Y == -0 then
+        pos.Y = 0
+    end
+    return Vector2.new(pos.X, pos.Y)
 end
 
 function blockMap:toHash(chunkPos: Vector3)

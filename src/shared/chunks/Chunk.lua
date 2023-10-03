@@ -14,7 +14,15 @@ function Chunk:new(position: Vector2)
 
     self.blocks = {}
     self.position = position
-    self.hash = string.format("%s,%s", position.X, position.Y)
+
+    -- So we can stop it from doing "-0"
+    if position.X == 0 then
+        self.hash = string.format("%s,%s", math.abs(position.X), position.Y)
+    end
+
+    if position.Y == 0 then
+        self.hash = string.format("%s,%s", position.X, math.abs(position.Y))
+    end
 
     if (game:GetService("RunService"):IsClient() ) then
         self.instance = Instance.new("Folder")
