@@ -23,12 +23,32 @@ local function drawChunk(hash)
     end
 end
 
+local function drawBlock(block)
+    local chunkHash = block:getChunkHash()
+    if (workspace.blocks[chunkHash]:FindFirstChild(block:getHash())) then
+        print("Block already exists at specified location!")
+        return
+    end
+
+    local instance = ReplicatedStorage.blocks[block.texture]:Clone()
+    instance.Name = block:getHash()
+    instance.Position = BlockMap:VoxelToRBX(block.position)
+    instance.Parent = workspace.blocks[chunkHash]
+end
+
+
 local function listener()
     BlockService.onBlockAdded:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
         WorldBuilder:AddBlock(block)
         print(string.format("Placing block at %s", tostring(block.position)))
-        drawChunk(block:getChunkHash())
+        print("ALL BLOCK POSITIONS: ")
+        for _, chunk in pairs(WorldData) do
+            for _, block in pairs(chunk.blocks) do
+                print(block.position)
+            end
+        end
+        drawBlock(block)
     end)
     BlockService.onBlockRemoved:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))

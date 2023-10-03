@@ -19,9 +19,7 @@ local BlockService = Knit.CreateService {
 
 -- Removed a block from the world.
 function BlockService:RemoveBlock(block)
-    print("Server has called to remove a block!")
     for _, player in pairs(Players:GetPlayers()) do
-        -- TODO: Add proximity check.
         BlockService.Client.onBlockRemoved:Fire(player, block)
     end
 end
@@ -50,11 +48,7 @@ end
 
 -- Removes a block from the world.
 function BlockService.Client:RemoveBlock(player, block)
-    print("Player has called to remove a block!")
-    for _, player in pairs(Players:GetPlayers()) do
-        -- TODO: Add proximity check.
-        BlockService.Client.onBlockRemoved:Fire(player, block)
-    end
+    return BlockService:RemoveBlock(block)
 end
 
 function Network:init()
