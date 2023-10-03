@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local Block = require(ReplicatedStorage.Common.blocks.Block)
+local WorldGen = require(game:GetService("ServerScriptService").Server.game.WorldGen)
 
 local BlockService = Knit.CreateService {
     Name = "BlockService",
@@ -15,11 +16,21 @@ local BlockService = Knit.CreateService {
     },
 }
 
+-- // Server Functions \\--
+
+-- Get the contents of a chunk by chunk hash.
+function BlockService:GetChunk(player, chunkPosition: Vector2)
+    -- Now we must serialize the chunk and the blocks inside of it.
+    local serializedChunk = WorldGen:GenerateChunk(chunkPosition):serialize()
+    
+    return serializedChunk
+end
+
 --// Client Functions \\--
 
 -- Get the contents of a chunk by chunk hash.
-function BlockService.Client:GetChunk(player, chunkHash)
-    return WorldBuilder:GetChunk(chunkHash)
+function BlockService.Client:GetChunk(player, chunkPosition: Vector2)
+    return BlockService:GetChunk(player, chunkPosition)
 end
 
 -- Assumes the block is being placed by a player.
@@ -45,11 +56,11 @@ end
 function Network:init()
     Players.PlayerAdded:Connect(function(player)
         print("Player joined!")
-        for x = 1, 10 do
-            local block = Block:new(Vector3.new(x,0,0), "grass")
-            WorldBuilder:AddBlock(block)
-            BlockService.Client.onBlockAdded:Fire(player, block:serialize())
-        end
+        -- for x = 1, 10 do
+        --     local block = Block:new(Vector3.new(x,0,0), "grass")
+        --     WorldBuilder:AddBlock(block)
+        --     BlockService.Client.onBlockAdded:Fire(player, block:serialize())
+        -- end
     end)
 end
 

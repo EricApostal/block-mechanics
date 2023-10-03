@@ -27,26 +27,19 @@ local function handleEvents()
         if not Mouse.Target then return end
 
         local target = Mouse.Target
-        local modifier = Vector3.new(0,0,0)
 
-        if (Mouse.TargetSurface.Name == "Top") then
-            modifier = Vector3.new(0,1,0)
-            elseif (Mouse.TargetSurface.Name == "Bottom") then
-            modifier = Vector3.new(0,-1,0)
-            elseif (Mouse.TargetSurface.Name == "Left") then
-            modifier = Vector3.new(-1,0,0)
-            elseif (Mouse.TargetSurface.Name == "Right") then
-            modifier = Vector3.new(1,0,0)
-            elseif (Mouse.TargetSurface.Name == "Front") then
-            modifier = Vector3.new(0,0,-1)
-            elseif (Mouse.TargetSurface.Name == "Back") then
-            modifier = Vector3.new(0,0,1)
-            else
-            error("Invalid surface name!")
-        end
-
+        local modifiers = {
+            ["Top"] = Vector3.new(0,1,0),
+            ["Bottom"] = Vector3.new(0,-1,0),
+            ["Left"] = Vector3.new(-1,0,0),
+            ["Right"] = Vector3.new(1,0,0),
+            ["Front"] = Vector3.new(0,0,-1),
+            ["Back"] = Vector3.new(0,0,1)
+        }
+        
+        -- Determine face to place block on.
         local mappedTarget = BlockMap:RBXToVoxel(target.Position)
-        local block = Block:new(mappedTarget + modifier, "grass")
+        local block = Block:new(mappedTarget + modifiers[Mouse.TargetSurface.Name], "grass")
 
         BlockService:PlaceBlock(block:serialize())
     end)

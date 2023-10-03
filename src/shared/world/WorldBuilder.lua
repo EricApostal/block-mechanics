@@ -14,7 +14,6 @@ local WorldData = require(script.Parent.WorldData)
 
 -- Calculates correct chunk to place block into, then places via WorldData.
 function WorldBuilder:AddBlock(block)
-    print(string.format("Adding block at %s", tostring(block.position)))
     -- "position" is already converted, thus there's no need to put it through blockmap.
     local chunk = block:getChunk()
     local chunkIndex = string.format("%s,%s", chunk.X, chunk.Y)
@@ -31,7 +30,6 @@ end
 
 -- Calculates target chunk containing block, then removes via WorldData.
 function WorldBuilder:RemoveBlock(block)
-    print(string.format("Removing block at %s", tostring(block.position)))
     WorldData[block:getChunkHash()] = nil
     if (game:GetService("RunService"):IsClient()) then
         local instance = workspace.blocks[block:getChunkHash()][block:getHash()]
@@ -39,14 +37,18 @@ function WorldBuilder:RemoveBlock(block)
     end
 end
 
-function WorldBuilder:GetChunk(hash: string)
+function WorldBuilder:GetChunk(position: Vector2)
+    print("GETTING CHUNKS")
+
+    -- Get hash and look for it in WorldData.
+    local hash = string.format("%s,%s", position.X, position.Y)
     local data = WorldData[hash]
-    --[[
-        If nil then call get chunk via knit (so we can handle both the client and the server).
-    ]]
+
+    -- If nil then call get chunk via knit (so we can handle both the client and the server).
     if (data == nil) then
         print(string.format("Generating chunk %s", hash))
-        -- GENERATE CHUNK HERE
+        -- Call knit to generate, which will run in WorldGen, then return.
+
     end
     return data
 end
