@@ -25,7 +25,9 @@ end
 -- Assumes the block is being placed by a player.
 function BlockService.Client:PlaceBlock(player, block)
     local blockObj = Block:new(table.unpack(block))
-    return WorldBuilder:AddBlock(blockObj)
+    WorldBuilder:AddBlock(blockObj)
+
+    BlockService.Client.onBlockAdded:Fire(player, block)
 end
 
 -- Update world data, then replicate to all clients.
