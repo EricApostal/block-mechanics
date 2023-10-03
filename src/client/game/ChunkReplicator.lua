@@ -37,19 +37,14 @@ local function drawBlock(block)
 end
 
 
+-- Create a listener for all block events.
 local function listener()
     BlockService.onBlockAdded:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
         WorldBuilder:AddBlock(block)
-        print(string.format("Placing block at %s", tostring(block.position)))
-        print("ALL BLOCK POSITIONS: ")
-        for _, chunk in pairs(WorldData) do
-            for _, block in pairs(chunk.blocks) do
-                print(block.position)
-            end
-        end
         drawBlock(block)
     end)
+    
     BlockService.onBlockRemoved:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
         local blockInstance = workspace.blocks[block:getChunkHash()][block:getHash()]

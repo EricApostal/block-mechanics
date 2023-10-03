@@ -40,7 +40,6 @@ function Chunk:AddBlock(block)
     if (table.find(self.blocks, hash)) then
         warn("Tried to place block at position, but block was already placed!")
     else 
-        print("New block being placed, adding to table!")
         self.blocks[hash] = block
     end
 end

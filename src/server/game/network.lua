@@ -15,19 +15,6 @@ local BlockService = Knit.CreateService {
     },
 }
 
---// Server Functions \\--
-
--- Removed a block from the world.
-function BlockService:RemoveBlock(block)
-    for _, player in pairs(Players:GetPlayers()) do
-        BlockService.Client.onBlockRemoved:Fire(player, block)
-    end
-end
-
-function BlockService:AddBlock(block)
-    return WorldBuilder:AddBlock(block)
-end
-
 --// Client Functions \\--
 
 -- Get the contents of a chunk by chunk hash.
@@ -37,19 +24,21 @@ end
 
 -- Assumes the block is being placed by a player.
 function BlockService.Client:PlaceBlock(player, block)
-    return WorldBuilder:AddBlock(block)
+    local blockObj = Block:new(table.unpack(block))
+    return WorldBuilder:AddBlock(blockObj)
 end
 
--- Assumes the block is being broken by a player.
+-- Update world data, then replicate to all clients.
 function BlockService.Client:BreakBlock(player, block)
     local blockObj = Block:new(table.unpack(block))
-    return WorldBuilder:RemoveBlock(blockObj)
+    WorldBuilder:RemoveBlock(blockObj)
+
+    -- Send changes to all clients.
+    for _, player in pairs(Players:GetPlayers()) do
+        BlockService.Client.onBlockRemoved:Fire(player, block)
+    end
 end
 
--- Removes a block from the world.
-function BlockService.Client:RemoveBlock(player, block)
-    return BlockService:RemoveBlock(block)
-end
 
 function Network:init()
     Players.PlayerAdded:Connect(function(player)

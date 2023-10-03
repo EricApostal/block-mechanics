@@ -46,7 +46,7 @@ function Block:getHash()
     if position.Z == -0 then
         position.Z = 0
     end
-    print("GOT BLOCCK HASH!")
+    
     return string.format("%s,%s,%s", position.X, position.Y, position.Z)
 end
 

@@ -14,6 +14,7 @@ local WorldData = require(script.Parent.WorldData)
 
 -- Calculates correct chunk to place block into, then places via WorldData.
 function WorldBuilder:AddBlock(block)
+    print(string.format("Adding block at %s", tostring(block.position)))
     -- "position" is already converted, thus there's no need to put it through blockmap.
     local chunk = block:getChunk()
     local chunkIndex = string.format("%s,%s", chunk.X, chunk.Y)
@@ -36,8 +37,6 @@ function WorldBuilder:RemoveBlock(block)
         local instance = workspace.blocks[block:getChunkHash()][block:getHash()]
         instance:Destroy()
     end
-    local serializedBlock = block:serialize()
-    Knit.GetService("BlockService"):RemoveBlock(serializedBlock)
 end
 
 function WorldBuilder:GetChunk(hash: string)
