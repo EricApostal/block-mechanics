@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local BlockService = Knit.GetService("BlockService")
 local Block = require(ReplicatedStorage.Common.blocks.Block)
+local BlockMap = require(ReplicatedStorage.Common.BlockMap)
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 
@@ -12,9 +13,12 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 local function drawChunk(hash)
     local chunk = WorldData[hash]
     for blockHash, block in pairs(chunk.blocks) do
+        if (workspace.blocks[hash]:FindFirstChild(blockHash)) then
+            continue
+        end
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
         instance.Name = blockHash
-        instance.Position = block.position
+        instance.Position = BlockMap:VoxelToRBX(block.position)
         instance.Parent = workspace.blocks[hash]
     end
 end
@@ -27,7 +31,9 @@ local function listener()
         drawChunk(block:getChunkHash())
     end)
     BlockService.onBlockRemoved:Connect(function(blockArray)
-        print("do block removal thing")
+        local block = Block:new(table.unpack(blockArray))
+        local blockInstance = workspace.blocks[block:getChunkHash()][block:getHash()]
+        blockInstance:Destroy()
     end)
 end
 

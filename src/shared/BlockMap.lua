@@ -5,9 +5,12 @@ local blockMap = {}
     Standardized module to map roblox coordinates to voxel coordinates
 ]]
 
-function blockMap:getPos(rblxPos: Vector3)
-    local pos = Vector3.new( math.round(rblxPos.X/3), math.round(rblxPos.Y/3), math.round(rblxPos.Z/3) )
-    return pos
+function blockMap:RBXToVoxel(rblxPos: Vector3)
+    return Vector3.new( math.round(rblxPos.X/3), math.round(rblxPos.Y/3), math.round(rblxPos.Z/3) )
+end
+
+function blockMap:VoxelToRBX(block)
+    return Vector3.new( math.round(block.X*3), math.round(block.Y*3), math.round(block.Z*3) )
 end
 
 function blockMap:getChunk(chunkPos: Vector2)

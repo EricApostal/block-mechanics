@@ -12,16 +12,11 @@ local function handleBreaking()
         if not Mouse.Target then return end
 
         local chunkHash = BlockMap:toHash(BlockMap:getChunk(Mouse.Target.Position))
-        local blockHash = BlockMap:toHash(Mouse.Target.Position)
+        local blockHash = BlockMap:toHash( BlockMap:RBXToVoxel(Mouse.Target.Position) )
 
+        print(string.format("Trying to break chunk %s, block %s", chunkHash, blockHash))
         local chunk = WorldData[chunkHash]
         local block = chunk.blocks[blockHash]
-
-        print("blockHash")
-        print(blockHash)
-
-        print("chunk hash: ")
-        print(chunkHash )
 
         BlockService:BreakBlock(block:serialize())
     end)

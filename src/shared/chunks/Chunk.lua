@@ -1,8 +1,6 @@
 -- Creates a chunk class.
-local Players = game:Service("Players")
+local Players = game:GetService("Players")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-
-local BlockService = Knit:GetService("BlockService")
 
 Chunk = {
     position = Vector2.new(0, 0)
@@ -41,7 +39,8 @@ end
 
 -- Removes block by block object.
 function Chunk:RemoveBlock(block)
-    print("removing block!")
+    local BlockService = Knit:GetService("BlockService")
+
     local hash = block:getHash()
 
     local players = Players:GetPlayers()

@@ -7,7 +7,9 @@
 local WorldBuilder = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Chunk = require(ReplicatedStorage.Common.chunks.Chunk)
+local Block = require(ReplicatedStorage.Common.blocks.Block)
 local WorldData = require(script.Parent.WorldData)
 
 -- Calculates correct chunk to place block into, then places via WorldData.
@@ -29,6 +31,13 @@ end
 -- Calculates target chunk containing block, then removes via WorldData.
 function WorldBuilder:RemoveBlock(block)
     print(string.format("Removing block at %s", tostring(block.position)))
+    WorldData[block:getChunkHash()] = nil
+    if (game:GetService("RunService"):IsClient()) then
+        local instance = workspace.blocks[block:getChunkHash()][block:getHash()]
+        instance:Destroy()
+    end
+    local serializedBlock = block:serialize()
+    Knit.GetService("BlockService"):RemoveBlock(serializedBlock)
 end
 
 function WorldBuilder:GetChunk(hash: string)

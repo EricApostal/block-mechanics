@@ -40,14 +40,12 @@ end
 
 -- Get the X,Y,Z hash of the block
 function Block:getHash(): string
-    local hash = string.format("%s,%s,%s", self.position.X, self.position.Y, self.position.Z)
-    return hash
+    return string.format("%s,%s,%s", self.position.X, self.position.Y, self.position.Z)
 end
 
 -- Get the hash of the current chunk
 function Block:getChunkHash():string
-    local hash = string.format("%s,%s", self:getChunk().X, self:getChunk().Y)
-    return hash
+    return string.format("%s,%s", self:getChunk().X, self:getChunk().Y)
 end
 
 -- Serialize so we can pass over the network.
