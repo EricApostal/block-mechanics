@@ -8,4 +8,3 @@ local Interact = require(script.game.Interact)
 Interact:init()
 ChunkReplicator:init()
 Interface:init()
-

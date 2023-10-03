@@ -18,7 +18,7 @@ function blockMap:getChunk(position)
 
     if (typeof(position) == "Vector2") then
         -- Are we getting the postition of a chunk?
-       pos = {X = math.round( ((position.X/3) -8 )/16) , Y = math.round( ((position.Y/3) -8 )/16)}
+       pos = {X = math.round(((position.X/3) - 8)/16) , Y = math.round(((position.Y/3) - 8)/16)}
         if pos.X == -0 then
             pos.X = 0
         end
