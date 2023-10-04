@@ -59,18 +59,6 @@ function Chunk:new(position: Vector2, blocks: table)
 end
 
 
--- Adds block by block object.
-function Chunk:AddBlock(block)
-    -- warn("This is a bad idea. Use WorldBuilder:AddBlock instead.")
-    local hash = block:getHash()
-
-    if (table.find(self.blocks, hash)) then
-        warn("Tried to place block at position, but block was already placed!")
-    else
-        self.blocks[hash] = block
-    end
-end
-
 -- Removes block by block object.
 function Chunk:RemoveBlock(block)
     local BlockService = Knit:GetService("BlockService")
