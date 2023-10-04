@@ -69,8 +69,8 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    for x = -5, 5 do
-        for y = -5, 5 do
+    for x = -1,1 do
+        for y = -1,1 do
             loadChunk(x, y)
         end
     end
