@@ -46,17 +46,6 @@ function blockMap:getChunk(position)
     end
 end
 
-function blockMap:getChunkFromVoxel(voxelPosition)
-    if (typeof(voxelPosition) == "Vector3") then
-        return blockMap:getChunk(Vector3.new(voxelPosition.X*3, voxelPosition.Z*3))
-    elseif (typeof(voxelPosition) == "Vector2") then
-        return blockMap:getChunk(Vector2.new(voxelPosition.X*3, voxelPosition.Y*3))
-    else
-        error("Invalid type passed to blockMap:getChunkFromVoxel")
-    end
-end
-
-
 function blockMap:toHash(chunkPos: Vector3)
     local hash
     if (typeof(chunkPos) == "Vector2") then

@@ -59,7 +59,6 @@ end
 -- Adds a block to the chunk.
 function Chunk:addBlock(block)
     -- WARNING: THIS SHOULD ONLY BE CALLED BY WORLDGEN!
-    print(string.format("Block with position %s should be in chunk %s", tostring(block.position), block:getChunkHash()))
     -- TODO: Add range check to ensure placement validity.
     self.blocks[block:getHash()] = block
 end
