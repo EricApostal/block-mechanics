@@ -8,19 +8,14 @@ local WorldBuilder = require(game:GetService("ReplicatedStorage").Common.world.W
 function WorldGen:GenerateChunk(position: Vector2)
     print("generating chunk w/ position")
     print(position)
-    print(typeof(position))
     local chunk = Chunk:new(position)
 
-    for x = 0,15 do
-        for y = 0,15 do
+    for x = 1,4 do
+        for y = 1,4 do
             local block = Block:new(Vector3.new(position.X + x, 0, position.Y + y), "grass")
-            print(block:getChunk())
             WorldBuilder:AddBlock(block)
         end
     end
-    print("chunk blocks from worldgen")
-    print(chunk.blocks)
-
     return chunk
 end
 
