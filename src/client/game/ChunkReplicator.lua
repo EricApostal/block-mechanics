@@ -13,15 +13,12 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 -- There should be a different function for chunks and individual blocks.
 local function drawChunk(hash)
     local chunk = WorldData[hash]
-    print("chunk: ")
-    print(chunk)
+    print(string.format("Drawing chunk %s", hash))
     for blockHash, block in pairs(chunk.blocks) do
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
             continue
         end
-        print("drawing block: ")
-        print(block)
-        print(block.texture)
+
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
         instance.Name = blockHash
         instance.Position = BlockMap:VoxelToRBX(block.position)
