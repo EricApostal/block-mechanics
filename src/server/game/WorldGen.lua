@@ -13,17 +13,21 @@ function WorldGen:GenerateChunk(position: Vector2)
     -- This will give us the bottom left corner of the chunk.
     -- Then we can iterate through the chunk and create blocks.
 
-    local chunk = Chunk:new(position)
-    print(string.format("WorldGen at chunk %s", chunk.hash))
-    print(chunk.blocks)
     local startBlockPosition = Vector2.new(position.X * 16, position.Y * 16)
+    local chunk
 
     for x = 0, 15 do
         for y = 0, 15 do
             local block = Block:new(Vector3.new(startBlockPosition.X + x, 0, startBlockPosition.Y + y), "grass")
-            WorldBuilder:AddBlock(block)
+            chunk = WorldBuilder:AddBlock(block)
+
+            if (not block:getChunkHash() == chunk.hash) then
+                error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
+            end
         end
     end
+    print(string.format("WorldGen at chunk %s", chunk.hash))
+    print(chunk:getBlocks())
     return chunk
 end
 

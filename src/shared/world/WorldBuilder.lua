@@ -25,7 +25,10 @@ function WorldBuilder:AddBlock(block)
     end
 
     -- Add block to chunk index.
-    WorldData[chunkIndex].blocks[block:getHash()] = block
+    WorldData[chunkIndex]:addBlock(block)
+
+    -- Dumb, but it allows us to get the chunk to ensure we're referencing correctly.
+    return WorldData[chunkIndex]
 end
 
 -- Calculates target chunk containing block, then removes via WorldData.
