@@ -26,18 +26,12 @@ function Chunk:new(position: Vector2, blocks: table)
 
     -- If blocks is passed in at all, it's a serialized chunk.
     if (blocks ~= nil) then
-        print("I think this is a serialized chunk, recreating blocks...")
         for _, block in pairs(blocks) do
-            print("Unpacking...")
-            if (block["position"]) then
-                error("Wrong format, should not be passing an obj through here!")
-            end
-
             local blockObj = Block:new(table.unpack(block))
             obj.blocks[blockObj:getHash()] = blockObj
         end
     else
-        print("No need to recreate blocks, this is a new chunk.")
+        -- print("No need to recreate blocks, this is a new chunk.")
     end
 
     -- So we can stop it from doing "-0"
@@ -65,11 +59,9 @@ end
 -- Adds a block to the chunk.
 function Chunk:addBlock(block)
     -- WARNING: THIS SHOULD ONLY BE CALLED BY WORLDGEN!
-    print(string.format("Adding block %s to chunk %s", block:getHash(), self.hash))
+    print(string.format("Block with position %s should be in chunk %s", tostring(block.position), block:getChunkHash()))
     -- TODO: Add range check to ensure placement validity.
     self.blocks[block:getHash()] = block
-
-    print(self.blocks)
 end
 
 -- Removes block by block object.

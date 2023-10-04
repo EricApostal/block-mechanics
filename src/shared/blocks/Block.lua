@@ -31,7 +31,7 @@ function Block:moveTo(position)
 end
 
 function Block:getChunk()
-    return BlockMap:getChunk(self.position)
+    return BlockMap:getChunkFromVoxel(self.position)
 end
 
 -- Get the X,Y,Z hash of the block

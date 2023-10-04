@@ -20,7 +20,7 @@ function WorldGen:GenerateChunk(position: Vector2)
         for y = 0, 15 do
             local block = Block:new(Vector3.new(startBlockPosition.X + x, 0, startBlockPosition.Y + y), "grass")
             chunk = WorldBuilder:AddBlock(block)
-
+            
             if (not block:getChunkHash() == chunk.hash) then
                 error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
             end

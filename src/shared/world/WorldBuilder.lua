@@ -20,7 +20,6 @@ function WorldBuilder:AddBlock(block)
 
     -- Create chunk, it doesn't exist yet
     if (WorldData[chunkIndex] == nil) then
-        print(string.format("Creating chunk %s", chunkIndex))
         WorldData[chunkIndex] = Chunk:new(chunk)
     end
 
@@ -40,9 +39,13 @@ function WorldBuilder:RemoveBlock(block)
     end
 end
 
-function WorldBuilder:GetChunk(position: Vector2)
-    print("GETTING CHUNKS")
+function WorldBuilder:AddChunk(chunk)
+    local chunkIndex = string.format("%s,%s", chunk.position.X, chunk.position.Y)
+    WorldData[chunkIndex] = chunk
+end
 
+-- I don't know if this is actually used, I'm pretty sure it's not.
+function WorldBuilder:GetChunk(position: Vector2)
     -- Get hash and look for it in WorldData.
     local hash = string.format("%s,%s", position.X, position.Y)
     local data = WorldData[hash]

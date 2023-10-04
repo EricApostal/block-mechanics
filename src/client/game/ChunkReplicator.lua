@@ -1,3 +1,5 @@
+--!native
+
 local ChunkReplicator = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

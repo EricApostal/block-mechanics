@@ -18,7 +18,7 @@ function blockMap:getChunk(position)
 
     if (typeof(position) == "Vector2") then
         -- Are we getting the postition of a chunk?
-       pos = {X = math.round(((position.X/3) - 8)/16) , Y = math.round(((position.Y/3) - 8)/16)}
+       pos = {X = math.floor(((position.X/3) - 8)/16) , Y = math.floor(((position.Y/3) - 8)/16)}
         if pos.X == -0 then
             pos.X = 0
         end
@@ -36,10 +36,6 @@ function blockMap:getChunk(position)
             pos.X = 0
         end
 
-        if pos.Y == -0 then
-            pos.Y = 0
-        end
-
         if pos.Z == -0 then
             pos.Z = 0
         end
@@ -49,6 +45,17 @@ function blockMap:getChunk(position)
         return nil
     end
 end
+
+function blockMap:getChunkFromVoxel(voxelPosition)
+    if (typeof(voxelPosition) == "Vector3") then
+        return blockMap:getChunk(Vector3.new(voxelPosition.X*3, voxelPosition.Z*3))
+    elseif (typeof(voxelPosition) == "Vector2") then
+        return blockMap:getChunk(Vector2.new(voxelPosition.X*3, voxelPosition.Y*3))
+    else
+        error("Invalid type passed to blockMap:getChunkFromVoxel")
+    end
+end
+
 
 function blockMap:toHash(chunkPos: Vector3)
     local hash
