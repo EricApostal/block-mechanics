@@ -1,3 +1,5 @@
+--!native
+
 -- Creates a chunk class.
 
 local Players = game:GetService("Players")
@@ -57,12 +59,7 @@ end
 
 -- Removes block by block object.
 function Chunk:RemoveBlock(block)
-    local BlockService = Knit:GetService("BlockService")
-
-    local hash = block:getHash()
-
-    local players = Players:GetPlayers()
-    BlockService:RemoveBlock(block:serialize())
+    self.blocks[block:getHash()] = nil
 end
 
 function Chunk:serialize()

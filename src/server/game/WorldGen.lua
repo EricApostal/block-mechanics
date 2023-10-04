@@ -1,3 +1,5 @@
+--!native
+
 local WorldGen = {}
 
 local Block = require(game:GetService("ReplicatedStorage").Common.blocks.Block)
@@ -26,6 +28,8 @@ function WorldGen:GenerateChunk(position: Vector2)
             end
         end
     end
+    WorldBuilder:AddChunk(chunk)
+
     print(string.format("WorldGen at chunk %s", chunk.hash))
     print(chunk:getBlocks())
     return chunk

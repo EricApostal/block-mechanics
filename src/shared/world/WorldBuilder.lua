@@ -32,7 +32,9 @@ end
 
 -- Calculates target chunk containing block, then removes via WorldData.
 function WorldBuilder:RemoveBlock(block)
-    WorldData[block:getChunkHash()] = nil
+    print("removing block: ")
+    print(WorldData[block:getChunkHash()]:RemoveBlock(block))
+    WorldData[block:getChunkHash()][block:getHash()] = nil
     if (game:GetService("RunService"):IsClient()) then
         local instance = workspace.blocks[block:getChunkHash()][block:getHash()]
         instance:Destroy()

@@ -1,6 +1,4 @@
---[[
-    Creates a block class.
-]]
+--!native
 
 local BlockMap = require(script.Parent.Parent.BlockMap)
 

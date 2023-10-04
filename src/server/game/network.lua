@@ -6,6 +6,8 @@ local Players = game:GetService("Players")
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local Block = require(ReplicatedStorage.Common.blocks.Block)
 local WorldGen = require(game:GetService("ServerScriptService").Server.game.WorldGen)
+local WorldData = require(ReplicatedStorage.Common.world.WorldData)
+local BlockMap = require(ReplicatedStorage.Common.BlockMap)
 
 local BlockService = Knit.CreateService {
     Name = "BlockService",
@@ -18,10 +20,16 @@ local BlockService = Knit.CreateService {
 
 -- // Server Functions \\--
 
--- Get the contents of a chunk by chunk hash.
+-- Get the contents of a chunk by chunk position.
 function BlockService:GetChunk(player, chunkPosition: Vector2)
     -- Now we must serialize the chunk and the blocks inside of it.
-    return WorldGen:GenerateChunk(chunkPosition):serialize()
+    local chunk = WorldData[BlockMap:toHash(chunkPosition)]
+    if (chunk == nil) then
+        chunk = WorldGen:GenerateChunk(chunkPosition)
+    end
+    print("Chunk was already in cache!")
+    print(chunk.blocks)
+    return chunk:serialize()
 end
 
 --// Client Functions \\--
@@ -36,12 +44,15 @@ function BlockService.Client:PlaceBlock(player, block)
     local blockObj = Block:new(table.unpack(block))
     WorldBuilder:AddBlock(blockObj)
 
-    BlockService.Client.onBlockAdded:Fire(player, block)
+    for _, player in pairs(Players:GetPlayers()) do
+        BlockService.Client.onBlockAdded:Fire(player, block)
+    end
 end
 
 -- Update world data, then replicate to all clients.
 function BlockService.Client:BreakBlock(player, block)
     local blockObj = Block:new(table.unpack(block))
+    WorldData[blockObj:getChunkHash()][blockObj:getHash()] = nil
     WorldBuilder:RemoveBlock(blockObj)
 
     -- Send changes to all clients.

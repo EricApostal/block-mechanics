@@ -15,7 +15,7 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 -- There should be a different function for chunks and individual blocks.
 local function drawChunk(hash)
     local chunk = WorldData[hash]
-    print(string.format("Drawing chunk %s", hash))
+    -- print(string.format("Drawing chunk %s", hash))
     for blockHash, block in pairs(chunk.blocks) do
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
             continue
@@ -31,7 +31,7 @@ end
 local function drawBlock(block)
     local chunkHash = block:getChunkHash()
     if (workspace.blocks[chunkHash]:FindFirstChild(block:getHash())) then
-        print("Block already exists at specified location!")
+        -- print("Block already exists at specified location!")
         return
     end
 
@@ -52,7 +52,7 @@ local function listener()
 
     BlockService.onBlockRemoved:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
-        print(string.format("Removing block %s from chunk %s", block:getHash(), block:getChunkHash()))
+        -- print(string.format("Removing block %s from chunk %s", block:getHash(), block:getChunkHash()))
         local blockInstance = workspace.blocks[block:getChunkHash()][block:getHash()]
         blockInstance:Destroy()
     end)
@@ -69,10 +69,37 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    for x = -1,1 do
-        for y = -1,1 do
-            loadChunk(x, y)
+    -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
+    while true do
+        local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
+        local chunkHash = BlockMap:toHash(chunkPosition)
+
+        -- Load the chunk we're in.
+        if (not WorldData[chunkHash]) then
+            loadChunk(chunkPosition.X, chunkPosition.Y)
         end
+
+        -- Load the chunks around us.
+        local proximityChunks = {}
+        for x = -1, 1 do
+            for y = -1, 1 do
+                local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
+                proximityChunks[chunkHash] = true
+                if (not WorldData[chunkHash]) then
+                    loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
+                end
+            end
+        end
+
+        for chunkHash, _ in pairs(WorldData) do
+            if (not proximityChunks[chunkHash]) then
+                -- print(string.format("Unloading chunk %s", chunkHash))
+                WorldData[chunkHash] = nil
+                workspace.blocks[chunkHash]:Destroy()
+            end
+        end
+
+        task.wait(1)
     end
 end
 

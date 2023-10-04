@@ -1,3 +1,5 @@
+--!native
+
 local Interact = {}
 
 local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
