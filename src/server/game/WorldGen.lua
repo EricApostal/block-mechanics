@@ -14,9 +14,12 @@ function WorldGen:GenerateChunk(position: Vector2)
     for x = 0,15 do
         for y = 0,15 do
             local block = Block:new(Vector3.new(position.X + x, 0, position.Y + y), "grass")
+            print(block:getChunk())
             WorldBuilder:AddBlock(block)
         end
     end
+    print("chunk blocks from worldgen")
+    print(chunk.blocks)
 
     return chunk
 end

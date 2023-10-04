@@ -60,19 +60,15 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    for x = -2,2 do
-        for y = -2,2 do
-            local chunkHash = string.format("%s,%s", x, y)
-            BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
-                local chunk = Chunk:new(table.unpack(chunkArray))
-                print("got chunk from promise!")
-                print(chunkArray)
-                WorldData[chunkHash] = chunk
-                drawChunk(chunkHash)
-            end)
-            -- drawChunk(chunkHash)
-        end
-    end
+    local chunkHash = string.format("%s,%s", 0, 0)
+    BlockService:GetChunk(Vector2.new(0,0)):andThen(function(chunkArray)
+        local chunk = Chunk:new(table.unpack(chunkArray))
+        print("got chunk from promise!")
+        print(chunkArray)
+        WorldData[chunkHash] = chunk
+        drawChunk(chunkHash)
+    end)
+    -- drawChunk(chunkHash)
 end
 
 function ChunkReplicator:init()

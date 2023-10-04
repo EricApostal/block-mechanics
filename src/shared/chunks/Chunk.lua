@@ -9,28 +9,30 @@ Chunk = {
 
 -- Makes a new chunk.
 function Chunk:new(position: Vector2, blocks: table)
-    local o = {}
-    setmetatable(o, self)
+    local obj = {}
+    setmetatable(obj, self)
     self.__index = self
 
-    self.blocks = blocks or {}
-    self.position = position
+    obj.blocks = blocks or {}
+    obj.position = position
 
-    -- Check for serialization, if exists then recreate all of the blocks
-    if (self.blocks[1] and typeof(self.blocks[1]) == "table") then
+    -- If blocks is passed in at all, it's a serialized chunk.
+    if (obj.blocks[1]) then
         print("I think this is a serialized chunk, recreating blocks...")
-        for _, block in pairs(self.blocks) do
-            print("Unpacking...")
-            print(block)
+        for _, block in pairs(obj.blocks) do
+            -- print("Unpacking...")
+            -- print(block)
             if (block["position"]) then
                 warn("the error happened, I don't know why, but it's been added very wrong. Quick fix for now, but this needs to be fixed properly!")
-                
+                local blockObj = Block:new(block["position"], block["texture"])
+                obj.blocks[blockObj:getHash()] = blockObj
+                continue
             end
             local blockObj = Block:new(table.unpack(block))
-            self.blocks[blockObj:getHash()] = blockObj
+            obj.blocks[blockObj:getHash()] = blockObj
         end
     else
-        print("No need to recreate blocks, this is a new chunk. Type: " .. typeof(self.blocks[1]))
+        print("No need to recreate blocks, this is a new chunk. Type: " .. typeof(obj.blocks[1]))
     end
 
     -- So we can stop it from doing "-0"
@@ -48,7 +50,7 @@ function Chunk:new(position: Vector2, blocks: table)
         self.instance.Parent = workspace.blocks
     end
 
-    return o
+    return obj
 end
 
 -- Adds block by block object.
