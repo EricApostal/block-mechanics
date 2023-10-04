@@ -55,8 +55,6 @@ local function listener()
     end)
 end
 
--- Create a listener to automatically send requests for chunks in a specified radius.
-
 local function loadChunk(x, y)
     local chunkHash = string.format("%s,%s", x,y)
     BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
@@ -66,9 +64,10 @@ local function loadChunk(x, y)
     end)
 end
 
+-- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- loadChunk(0, 0)
-    loadChunk(0, 1)
+    loadChunk(0, 0)
 end
 
 function ChunkReplicator:init()

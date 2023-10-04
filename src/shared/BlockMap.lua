@@ -31,7 +31,7 @@ function blockMap:getChunk(position)
         
     elseif(typeof(position) == "Vector3") then
         -- Are we getting the position of a block?
-        pos = {X = math.round( ((position.X/3) -8 )/16) , Z = math.round( ((position.Z/3) -8 )/16)}
+        pos = {X = math.floor( ((position.X/3))/16) , Z = math.floor( ((position.Z/3) )/16)}
         if pos.X == -0 then
             pos.X = 0
         end
