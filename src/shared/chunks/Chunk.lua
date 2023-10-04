@@ -24,6 +24,10 @@ function Chunk:new(position: Vector2, blocks: table)
     
     obj.position = position
 
+    if (typeof("position") == "Vector3") then
+        error("Should be passing a Vector2 to Chunk:new(), not a Vector3!")
+    end
+
     -- If blocks is passed in at all, it's a serialized chunk.
     if (blocks ~= nil) then
         print("I think this is a serialized chunk, recreating blocks...")

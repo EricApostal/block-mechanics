@@ -50,6 +50,7 @@ local function listener()
 
     BlockService.onBlockRemoved:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
+        print(string.format("Removing block %s from chunk %s", block:getHash(), block:getChunkHash()))
         local blockInstance = workspace.blocks[block:getChunkHash()][block:getHash()]
         blockInstance:Destroy()
     end)
@@ -67,7 +68,7 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- loadChunk(0, 0)
-    loadChunk(0, 0)
+    loadChunk(1, 0)
 end
 
 function ChunkReplicator:init()

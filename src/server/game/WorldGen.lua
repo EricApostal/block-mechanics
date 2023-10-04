@@ -12,13 +12,13 @@ function WorldGen:GenerateChunk(position: Vector2)
     -- This is done by multiplying the chunk position by 16.
     -- This will give us the bottom left corner of the chunk.
     -- Then we can iterate through the chunk and create blocks.
-    local newPosition = Vector2.new(position.X * 16, position.Y * 16)
 
-    local chunk = Chunk:new(newPosition)
+    local chunk = Chunk:new(position)
+    local startBlockPosition = Vector2.new(position.X * 16, position.Y * 16)
 
     for x = 0, 15 do
         for y = 0, 15 do
-            local block = Block:new(Vector3.new(newPosition.X + x, 0, newPosition.Y + y), "grass")
+            local block = Block:new(Vector3.new(startBlockPosition.X + x, 0, startBlockPosition.Y + y), "grass")
             WorldBuilder:AddBlock(block)
         end
     end
