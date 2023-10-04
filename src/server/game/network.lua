@@ -52,14 +52,6 @@ end
 
 
 function Network:init()
-    Players.PlayerAdded:Connect(function(player)
-        print("Player joined!")
-        -- for x = 1, 10 do
-        --     local block = Block:new(Vector3.new(x,0,0), "grass")
-        --     WorldBuilder:AddBlock(block)
-        --     BlockService.Client.onBlockAdded:Fire(player, block:serialize())
-        -- end
-    end)
 end
 
 

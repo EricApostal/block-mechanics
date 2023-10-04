@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Block = require(game:GetService("ReplicatedStorage").Common.blocks.Block)
+local BlockMap = require(game:GetService("ReplicatedStorage").Common.BlockMap)
 
 local Chunk = {}
 
@@ -12,7 +13,7 @@ function Chunk:new(position: Vector2, blocks: table)
     setmetatable(obj, self)
     self.__index = self
 
-    obj.hash = ""
+    obj.hash = BlockMap:toHash(position)
     obj.instance = nil
 
     -- Initialize "blocks" as an empty table.
@@ -32,15 +33,6 @@ function Chunk:new(position: Vector2, blocks: table)
         end
     else
         -- print("No need to recreate blocks, this is a new chunk.")
-    end
-
-    -- So we can stop it from doing "-0"
-    if position.X == 0 then
-        obj.hash = string.format("%s,%s", math.abs(position.X), position.Y)
-    end
-
-    if position.Y == 0 then
-        obj.hash = string.format("%s,%s", position.X, math.abs(position.Y))
     end
 
     if (game:GetService("RunService"):IsClient() ) then

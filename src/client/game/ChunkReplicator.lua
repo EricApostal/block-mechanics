@@ -69,7 +69,11 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    loadChunk(0,-1)
+    for x = -5, 5 do
+        for y = -5, 5 do
+            loadChunk(x, y)
+        end
+    end
 end
 
 function ChunkReplicator:init()
