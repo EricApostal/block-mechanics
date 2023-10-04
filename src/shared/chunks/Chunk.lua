@@ -3,20 +3,17 @@ local Players = game:GetService("Players")
 local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
 local Block = require(game:GetService("ReplicatedStorage").Common.blocks.Block)
 
-Chunk = {
-    position = Vector2.new(0, 0),
-    blocks = {}
-}
-
+local Chunk = {}
 -- Makes a new chunk.
 function Chunk:new(position: Vector2, blocks: table)
     local obj = {}
     setmetatable(obj, self)
     self.__index = self
 
-    obj.blocks = blocks
     obj.hash = ""
     obj.instance = nil
+
+    obj.blocks = blocks
 
     if (not obj.blocks) then
         obj.blocks = {}
@@ -41,7 +38,7 @@ function Chunk:new(position: Vector2, blocks: table)
             obj.blocks[blockObj:getHash()] = blockObj
         end
     else
-        print("No need to recreate blocks, this is a new chunk. Type: " .. typeof(obj.blocks[1]))
+        print("No need to recreate blocks, this is a new chunk.")
     end
 
     -- So we can stop it from doing "-0"

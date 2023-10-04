@@ -14,6 +14,8 @@ function WorldGen:GenerateChunk(position: Vector2)
     -- Then we can iterate through the chunk and create blocks.
 
     local chunk = Chunk:new(position)
+    print(string.format("WorldGen at chunk %s", chunk.hash))
+    print(chunk.blocks)
     local startBlockPosition = Vector2.new(position.X * 16, position.Y * 16)
 
     for x = 0, 15 do
