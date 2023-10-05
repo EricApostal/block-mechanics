@@ -27,8 +27,7 @@ function BlockService:GetChunk(player, chunkPosition: Vector2)
     if (chunk == nil) then
         chunk = WorldGen:GenerateChunk(chunkPosition)
     end
-    print("Chunk was already in cache!")
-    print(chunk.blocks)
+
     return chunk:serialize()
 end
 

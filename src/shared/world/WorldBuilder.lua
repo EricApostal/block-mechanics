@@ -17,7 +17,7 @@ function WorldBuilder:AddBlock(block)
     -- "position" is already converted, thus there's no need to put it through blockmap.
     local chunk = block:getChunk()
     local chunkIndex = string.format("%s,%s", chunk.X, chunk.Y)
-
+    
     -- Create chunk, it doesn't exist yet
     if (WorldData[chunkIndex] == nil) then
         WorldData[chunkIndex] = Chunk:new(chunk)

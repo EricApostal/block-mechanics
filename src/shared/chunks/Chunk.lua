@@ -37,7 +37,7 @@ function Chunk:new(position: Vector2, blocks: table)
         -- print("No need to recreate blocks, this is a new chunk.")
     end
 
-    if (game:GetService("RunService"):IsClient() ) then
+    if (game:GetService("RunService"):IsClient() and (not workspace.blocks:FindFirstChild(obj.hash))) then
         obj.instance = Instance.new("Folder")
         obj.instance.Name = obj.hash
         obj.instance.Parent = workspace.blocks
@@ -60,6 +60,10 @@ end
 -- Removes block by block object.
 function Chunk:RemoveBlock(block)
     self.blocks[block:getHash()] = nil
+end
+
+function Chunk:getHash()
+    return self.hash
 end
 
 function Chunk:serialize()
