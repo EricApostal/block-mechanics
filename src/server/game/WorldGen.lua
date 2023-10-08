@@ -18,8 +18,6 @@ function WorldGen:GenerateChunk(position: Vector2)
     -- Then we can iterate through the chunk and create blocks.
 
     local startBlockPosition = Vector3.new(position.X * 16, 0, position.Y * 16)
-    print("chunk position: ")
-    print(position)
 
     WorldData[string.format("%s,%s",position.X, position.Y)] = Chunk:new(position)
     local chunk =  WorldData[string.format("%s,%s",position.X, position.Y)]
@@ -31,19 +29,27 @@ function WorldGen:GenerateChunk(position: Vector2)
         for z = startBlockPosition.Z, startBlockPosition.Z + 15 do
             local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
             local min, max = 0, scale
+            local calculatedY = math.round((min+(max-min)*y)/3)
 
-            local block = Block:new(Vector3.new(x, math.round((min+(max-min)*y)/3), z), "grass")
+            local block = Block:new(Vector3.new(x, calculatedY, z), "grass")
             WorldBuilder:AddBlock(block)
-            
+
+            -- Now we need to generate blocks below the current block.
+            for newY = calculatedY, 0, -1  do
+                local block = Block:new(Vector3.new(x, math.round(calculatedY - newY), z), "grass")
+                WorldBuilder:AddBlock(block)
+            end
+
             if (not block:getChunkHash() == chunk.hash) then
                 error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
             end
+
+
+
         end
     end
     WorldBuilder:AddChunk(chunk)
 
-    print(string.format("WorldGen at chunk %s", chunk.hash))
-    print(chunk:getBlocks())
     return chunk
 end
 

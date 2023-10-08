@@ -69,7 +69,7 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    local radius = 3
+    local radius = 2
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
         local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
