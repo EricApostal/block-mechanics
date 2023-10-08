@@ -23,10 +23,10 @@ local function getTouchingBlocks(block): number
         ["Back"] = Vector3.new(0,0,1)
     }
     for i, position in modifiers do
-        local blockPosition = block.position + modifiers[i]
+        local blockPosition = block.position + position
         local blockHash = BlockMap:toHash(blockPosition)
-        local chunkHash = block:getChunkHash()
-        
+        local chunkHash = BlockMap:toHash( BlockMap:getChunk(BlockMap:VoxelToRBX(blockPosition)))
+
         if (WorldData[chunkHash] and WorldData[chunkHash].blocks[blockHash]) then
             touchingBlocks += 1
         end
@@ -45,7 +45,6 @@ local function drawChunk(hash)
         if (getTouchingBlocks(block) == 6) then
             continue
         end
-
 
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
         instance.Name = blockHash
