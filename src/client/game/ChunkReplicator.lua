@@ -11,8 +11,29 @@ local BlockMap = require(ReplicatedStorage.Common.BlockMap)
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 
--- Actually create the blocks from WorldData.
--- There should be a different function for chunks and individual blocks.
+-- Get the number of blocks touching the specified block.
+local function getTouchingBlocks(block): number
+    local touchingBlocks = 0
+    local modifiers = {
+        ["Top"] = Vector3.new(0,1,0),
+        ["Bottom"] = Vector3.new(0,-1,0),
+        ["Left"] = Vector3.new(-1,0,0),
+        ["Right"] = Vector3.new(1,0,0),
+        ["Front"] = Vector3.new(0,0,-1),
+        ["Back"] = Vector3.new(0,0,1)
+    }
+    for i, position in modifiers do
+        local blockPosition = block.position + modifiers[i]
+        local blockHash = BlockMap:toHash(blockPosition)
+        local chunkHash = block:getChunkHash()
+        
+        if (WorldData[chunkHash] and WorldData[chunkHash].blocks[blockHash]) then
+            touchingBlocks += 1
+        end
+    end
+    return touchingBlocks
+end
+
 local function drawChunk(hash)
     local chunk = WorldData[hash]
     -- print(string.format("Drawing chunk %s", hash))
@@ -20,6 +41,11 @@ local function drawChunk(hash)
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
             continue
         end
+
+        if (getTouchingBlocks(block) == 6) then
+            continue
+        end
+
 
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
         instance.Name = blockHash
@@ -63,6 +89,7 @@ local function loadChunk(x, y)
     BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
         local chunk = Chunk:new(table.unpack(chunkArray))
         WorldData[chunkHash] = chunk
+        
         drawChunk(chunkHash)
     end)
 end
