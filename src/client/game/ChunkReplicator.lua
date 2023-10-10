@@ -156,7 +156,7 @@ local function chunkListener()
                 print(string.format("Unloading chunk %s", chunkHash))
                 WorldData[chunkHash] = nil
                 workspace.blocks[chunkHash]:Destroy()
-                task.wait(0.1)
+                task.wait()
             end
         end
 
