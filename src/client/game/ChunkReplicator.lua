@@ -37,7 +37,11 @@ end
 local function drawChunk(hash)
     local chunk = WorldData[hash]
     -- print(string.format("Drawing chunk %s", hash))
-    for blockHash, block in pairs(chunk.blocks) do
+
+    -- do top level chunks first
+    -- then do the rest of the chunks
+
+    for blockHash, block in pairs(chunk.topLevelBlocks) do
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
             continue
         end
@@ -50,10 +54,27 @@ local function drawChunk(hash)
         instance.Name = blockHash
         instance.Position = BlockMap:VoxelToRBX(block.position)
         instance.Parent = workspace.blocks[hash]
+    end
 
-        if not chunk:isTopLevelBlock(block) then
-            task.wait()
+    for blockHash, block in pairs(chunk.blocks) do
+        if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
+            continue
         end
+
+        if (getTouchingBlocks(block) == 6) then
+            continue
+        end
+
+        if (chunk.topLevelBlocks[blockHash]) then
+            continue
+        end
+
+        local instance = ReplicatedStorage.blocks[block.texture]:Clone()
+        instance.Name = blockHash
+        instance.Position = BlockMap:VoxelToRBX(block.position)
+        instance.Parent = workspace.blocks[hash]
+
+        task.wait()
     end
 end
 
@@ -88,12 +109,17 @@ end
 
 local function loadChunk(x, y)
     local chunkHash = string.format("%s,%s", x,y)
+    local chunk
+
     BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
-        local chunk = Chunk:new(table.unpack(chunkArray))
+        chunk = Chunk:new(table.unpack(chunkArray))
         WorldData[chunkHash] = chunk
-        
-        drawChunk(chunkHash)
     end)
+
+    -- Shit async -> sync
+    while not chunk do task.wait() end
+
+    return chunk
 end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
@@ -106,20 +132,28 @@ local function chunkListener()
 
         -- Load the chunks around us.
         local proximityChunks = {}
+
+        local toLoad = {}
+
         for x = -radius, radius do
             for y = -radius, radius do
                 local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
                 proximityChunks[chunkHash] = true
                 if (not WorldData[chunkHash]) then
-                    loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
-                    task.wait(0.1)
+                    local chunk = loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
+                    toLoad[chunkHash] = chunk
                 end
             end
         end
 
+        for hash, chunk in pairs(toLoad) do
+            task.spawn(function() drawChunk(chunk:getHash()) end)
+            task.wait(.1)
+        end
+
         for chunkHash, _ in pairs(WorldData) do
             if (not proximityChunks[chunkHash]) then
-                -- print(string.format("Unloading chunk %s", chunkHash))
+                print(string.format("Unloading chunk %s", chunkHash))
                 WorldData[chunkHash] = nil
                 workspace.blocks[chunkHash]:Destroy()
                 task.wait(0.1)
