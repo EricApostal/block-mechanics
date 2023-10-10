@@ -50,6 +50,10 @@ local function drawChunk(hash)
         instance.Name = blockHash
         instance.Position = BlockMap:VoxelToRBX(block.position)
         instance.Parent = workspace.blocks[hash]
+
+        if not chunk:isTopLevelBlock(block) then
+            task.wait()
+        end
     end
 end
 
@@ -65,7 +69,6 @@ local function drawBlock(block)
     instance.Position = BlockMap:VoxelToRBX(block.position)
     instance.Parent = workspace.blocks[chunkHash]
 end
-
 
 -- Create a listener for all block events.
 local function listener()
@@ -95,16 +98,11 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    local radius = 2
+    local radius = 3
+
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
         local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
-        local chunkHash = BlockMap:toHash(chunkPosition)
-
-        -- Load the chunk we're in.
-        if (not WorldData[chunkHash]) then
-            loadChunk(chunkPosition.X, chunkPosition.Y)
-        end
 
         -- Load the chunks around us.
         local proximityChunks = {}
@@ -114,6 +112,7 @@ local function chunkListener()
                 proximityChunks[chunkHash] = true
                 if (not WorldData[chunkHash]) then
                     loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
+                    task.wait(0.1)
                 end
             end
         end
@@ -123,6 +122,7 @@ local function chunkListener()
                 -- print(string.format("Unloading chunk %s", chunkHash))
                 WorldData[chunkHash] = nil
                 workspace.blocks[chunkHash]:Destroy()
+                task.wait(0.1)
             end
         end
 

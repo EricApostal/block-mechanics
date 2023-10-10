@@ -10,13 +10,14 @@ local BlockMap = require(game:GetService("ReplicatedStorage").Common.BlockMap)
 local Chunk = {}
 
 -- Makes a new chunk.
-function Chunk:new(position: Vector2, blocks: table)
+function Chunk:new(position: Vector2, blocks: table, topLevelBlocks: table)
     local obj = {}
     setmetatable(obj, self)
     self.__index = self
 
     obj.hash = BlockMap:toHash(position)
     obj.instance = nil
+    obj.topLevelBlocks = topLevelBlocks or {} -- Initialize "topLevelBlocks" as an empty table.
 
     -- Initialize "blocks" as an empty table.
     obj.blocks = {}
@@ -50,6 +51,16 @@ function Chunk:getBlocks()
     return self.blocks
 end
 
+-- Register a block as being at the top of a chunk. Useful for lazy rendering later.
+function Chunk:setTopLevelBlock(block)
+    self.topLevelBlocks[block:getHash()] = block
+end
+
+-- Check if a block is top level.
+function Chunk:isTopLevelBlock(block)
+    return self.topLevelBlocks[block:getHash()] ~= nil
+end
+
 -- Adds a block to the chunk.
 function Chunk:addBlock(block)
     -- WARNING: THIS SHOULD ONLY BE CALLED BY WORLDGEN!
@@ -76,6 +87,7 @@ function Chunk:serialize()
     return {
         self.position,
         blocks,
+        self.topLevelBlocks
     }
 end
 

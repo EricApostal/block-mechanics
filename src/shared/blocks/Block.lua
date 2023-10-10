@@ -12,7 +12,6 @@ function Block:new(position, texture, breakTimes)
     obj.position = position
     obj.texture = texture
     obj.breakTimes = breakTimes
-
     if texture == nil then
         error("ERROR: Block was created but no texture was defined.")
     end
@@ -47,6 +46,12 @@ function Block:getHash()
     
     return string.format("%s,%s,%s", position.X, position.Y, position.Z)
 end
+
+--[[
+    IDEA:
+    Have an attribute "isTopLevel", if it's the highest Y level in the chunk. Perhaps we can load the top
+    synronously, and the rest of the chunk asynchronously.
+]]
 
 -- Get the hash of the current chunk
 function Block:getChunkHash()

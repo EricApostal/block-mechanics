@@ -33,6 +33,7 @@ function WorldGen:GenerateChunk(position: Vector2)
 
             local block = Block:new(Vector3.new(x, calculatedY, z), "grass")
             WorldBuilder:AddBlock(block)
+            chunk:setTopLevelBlock(block)
 
             -- Now we need to generate blocks below the current block.
             for newY = calculatedY, 0, -1  do
@@ -40,11 +41,9 @@ function WorldGen:GenerateChunk(position: Vector2)
                 WorldBuilder:AddBlock(block)
             end
 
-            if (not block:getChunkHash() == chunk.hash) then
+            if (block:getChunkHash() ~= chunk.hash) then
                 error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
             end
-
-
 
         end
     end
