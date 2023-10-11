@@ -145,7 +145,7 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    local radius = 3
+    local radius = 4
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
@@ -169,7 +169,7 @@ local function chunkListener()
 
         for hash, chunk in pairs(toLoad) do
             task.spawn(function() drawChunk(chunk:getHash()) end)
-            task.wait(.1)
+            task.wait()
         end
 
         for chunkHash, _ in pairs(WorldData) do
