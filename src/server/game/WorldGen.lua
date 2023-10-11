@@ -26,7 +26,7 @@ local function spawnTree(position: Vector3)
         if chunk then
             chunk:setTopLevelBlock(block)
         end
-        
+
         -- If the chunk already exists, send an add block request to manually replicate it.
         if (WorldData[block:getChunkHash()] ~= nil) then
             local BlockService = Knit.GetService("BlockService")
@@ -53,33 +53,32 @@ function WorldGen:GenerateChunk(position: Vector2)
 
     local chunk =  WorldData[string.format("%s,%s",position.X, position.Y)]
 
-    local scale = 200
-    local seed = 126
+    local seed = 160
+    local noisescale = 20
+    local amplitude = 50
 
     for x = startBlockPosition.X, startBlockPosition.X + 15 do
         for z = startBlockPosition.Z, startBlockPosition.Z + 15 do
-            local y = ((1+math.noise(x/scale, z/scale, seed/1000))/2)
-            local min, max = 0, scale
-            local calculatedY = math.round((min+(max-min)*y)/3)
+            for y = 0, 63 do
+                local xnoise = math.noise(y/noisescale, z/noisescale, seed)*amplitude
+                local ynoise = math.noise(x/noisescale, z/noisescale, seed)*amplitude
+                local znoise = math.noise(x/noisescale, y/noisescale, seed)*amplitude
 
-            local block = Block:new(Vector3.new(x, calculatedY, z), "grass")
-            WorldBuilder:AddBlock(block)
-            chunk:setTopLevelBlock(block)
+                local density = xnoise + ynoise + znoise + y
+                if density < 50 then
+                    local block = Block:new(Vector3.new(x, y, z), "grass")
+                    WorldBuilder:AddBlock(block)
+                    chunk:setTopLevelBlock(block)
 
-            -- Now we need to generate blocks below the current block.
-            for newY = calculatedY, 0, -1  do
-                local block = Block:new(Vector3.new(x, math.round(calculatedY - newY), z), "dirt")
-                WorldBuilder:AddBlock(block)
+                    if (block:getChunkHash() ~= chunk.hash) then
+                        error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
+                    end
+
+                    -- if (math.random(1,100) == 1) then
+                    --     spawnTree(Vector3.new(x, calculatedY + 1, z))
+                    -- end
+                end
             end
-
-            if (block:getChunkHash() ~= chunk.hash) then
-                error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
-            end
-
-            if (math.random(1,100) == 1) then
-                spawnTree(Vector3.new(x, calculatedY + 1, z))
-            end
-
         end
     end
     chunk.isGenerated = true
