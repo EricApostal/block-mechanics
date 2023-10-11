@@ -51,7 +51,7 @@ end
 -- Update world data, then replicate to all clients.
 function BlockService.Client:BreakBlock(player, block)
     local blockObj = Block:new(table.unpack(block))
-    WorldData[blockObj:getChunkHash()][blockObj:getHash()] = nil
+    WorldData[blockObj:getChunkHash()]:RemoveBlock(blockObj)
     WorldBuilder:RemoveBlock(blockObj)
 
     -- Send changes to all clients.

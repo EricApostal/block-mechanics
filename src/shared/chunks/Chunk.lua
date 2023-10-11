@@ -70,6 +70,9 @@ end
 
 -- Removes block by block object.
 function Chunk:RemoveBlock(block)
+    if self.topLevelBlocks[block:getHash()] then
+        self.topLevelBlocks[block:getHash()] = nil
+    end
     self.blocks[block:getHash()] = nil
 end
 
