@@ -29,18 +29,18 @@ function DebugUI:init()
     local main_ui = new "Frame" {
         Position = UDim2.fromOffset(0, 0),
         AnchorPoint = Vector2.new(0, 0),
-        Size = UDim2.fromOffset(200, 80),
-        BackgroundColor3 = Color3.new(0.3058823529411765, 0.3254901960784314, 0.34509803921568627),
+        Size = UDim2.fromOffset(200, 50),
+        BackgroundColor3 = Color3.new(0.105882, 0.113725, 0.117647),
     
         [Children] = {
-            new "UICorner" {
-                CornerRadius = UDim.new(0, 4),
-            },
+            -- new "UICorner" {
+            --     CornerRadius = UDim.new(0, 4),
+            -- },
             new "TextLabel" {
                 Text = Position,
                 BackgroundTransparency = 1,
                 Position = UDim2.fromOffset(0, 0),
-                Size = UDim2.fromScale(1, 1),
+                Size = UDim2.fromScale(1, 0.5),
                 TextColor = BrickColor.White(),
                 TextSize = 18,
                 FontFace  = Font.fromName("RobotoMono"),
@@ -49,7 +49,7 @@ function DebugUI:init()
                 Text = Chunk,
                 BackgroundTransparency = 1,
                 Position = UDim2.fromOffset(0, 20),
-                Size = UDim2.fromScale(1, 1),
+                Size = UDim2.fromScale(1, 0.5),
                 TextColor = BrickColor.White(),
                 TextSize = 18,
                 FontFace  = Font.fromName("RobotoMono")

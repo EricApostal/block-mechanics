@@ -22,7 +22,7 @@ function WorldGen:GenerateChunk(position: Vector2)
     WorldData[string.format("%s,%s",position.X, position.Y)] = Chunk:new(position)
     local chunk =  WorldData[string.format("%s,%s",position.X, position.Y)]
 
-    local scale = 100
+    local scale = 200
     local seed = 126
 
     for x = startBlockPosition.X, startBlockPosition.X + 15 do

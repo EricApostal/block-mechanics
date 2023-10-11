@@ -18,8 +18,6 @@ local function handleEvents()
         local chunkHash = BlockMap:toHash(BlockMap:getChunk(Mouse.Target.Position))
         local blockHash = BlockMap:toHash( BlockMap:RBXToVoxel(Mouse.Target.Position) )
 
-        print("should be in chunk " .. chunkHash)
-
         local chunk = WorldData[chunkHash]
         local block = chunk.blocks[blockHash]
 

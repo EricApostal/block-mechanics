@@ -36,7 +36,6 @@ end
 
 local function drawChunk(hash)
     local chunk = WorldData[hash]
-    -- print(string.format("Drawing chunk %s", hash))
 
     -- do top level chunks first
     -- then do the rest of the chunks
@@ -61,11 +60,15 @@ local function drawChunk(hash)
             continue
         end
 
+        if (chunk.topLevelBlocks[blockHash]) then
+            continue
+        end
+
         if (getTouchingBlocks(block) == 6) then
             continue
         end
 
-        if (chunk.topLevelBlocks[blockHash]) then
+        if (block.position.Y == 0) then
             continue
         end
 
@@ -121,8 +124,7 @@ local function listener()
             local chunkHash = BlockMap:toHash( BlockMap:getChunk(BlockMap:VoxelToRBX(blockPosition)))
 
             if (WorldData[chunkHash] and WorldData[chunkHash].blocks[blockHash]) then
-                local block = WorldData[chunkHash].blocks[blockHash]
-                drawBlock(block)
+                drawBlock(WorldData[chunkHash].blocks[blockHash])
             end
         end
     end)
@@ -145,7 +147,7 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    local radius = 4
+    local radius = 2
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
@@ -174,10 +176,9 @@ local function chunkListener()
 
         for chunkHash, _ in pairs(WorldData) do
             if (not proximityChunks[chunkHash]) then
-                print(string.format("Unloading chunk %s", chunkHash))
                 WorldData[chunkHash] = nil
                 workspace.blocks[chunkHash]:Destroy()
-                task.wait()
+                task.wait(0.1)
             end
         end
 

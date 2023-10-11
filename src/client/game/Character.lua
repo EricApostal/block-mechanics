@@ -20,7 +20,7 @@ local function handleMovement()
                 FOV = 88
             end
             
-            character.Humanoid.JumpHeight = 3.75
+            character.Humanoid.JumpHeight = 3
             camera.FieldOfView = FOV
             character.Humanoid.WalkSpeed = walkspeed
         end
