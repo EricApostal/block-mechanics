@@ -20,7 +20,12 @@ function WorldBuilder:AddBlock(block)
     
     -- Create chunk, it doesn't exist yet
     if (WorldData[chunkIndex] == nil) then
-        WorldData[chunkIndex] = Chunk:new(chunk)
+        --[[
+            This skips chunk gen, which is bad.
+            This needs to generate the chunk as well, MAYBE.
+        ]]
+
+        WorldData[chunkIndex] = Chunk:new(chunk, nil, nil, false)
     end
 
     -- Add block to chunk index.

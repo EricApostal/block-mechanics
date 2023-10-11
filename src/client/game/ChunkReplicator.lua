@@ -41,7 +41,7 @@ local function drawChunk(hash)
     -- then do the rest of the chunks
 
     for blockHash, block in pairs(chunk.topLevelBlocks) do
-        if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
+        if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash) and (WorldData[hash].isGenerated == true)) then
             continue
         end
 
@@ -162,7 +162,7 @@ local function chunkListener()
             for y = -radius, radius do
                 local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
                 proximityChunks[chunkHash] = true
-                if (not WorldData[chunkHash]) then
+                if ((not WorldData[chunkHash]) or (WorldData[chunkHash].isGenerated == false)) then
                     local chunk = loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
                     toLoad[chunkHash] = chunk
                 end

@@ -10,7 +10,7 @@ local BlockMap = require(game:GetService("ReplicatedStorage").Common.BlockMap)
 local Chunk = {}
 
 -- Makes a new chunk.
-function Chunk:new(position: Vector2, blocks: table, topLevelBlocks: table)
+function Chunk:new(position: Vector2, blocks: table, topLevelBlocks: table, isGenerated: boolean)
     local obj = {}
     setmetatable(obj, self)
     self.__index = self
@@ -18,6 +18,7 @@ function Chunk:new(position: Vector2, blocks: table, topLevelBlocks: table)
     obj.hash = BlockMap:toHash(position)
     obj.instance = nil
     obj.topLevelBlocks = topLevelBlocks or {} -- Initialize "topLevelBlocks" as an empty table.
+    obj.isGenerated = isGenerated
 
     -- Initialize "blocks" as an empty table.
     obj.blocks = {}
@@ -26,6 +27,10 @@ function Chunk:new(position: Vector2, blocks: table, topLevelBlocks: table)
 
     if (typeof("position") == "Vector3") then
         error("Should be passing a Vector2 to Chunk:new(), not a Vector3!")
+    end
+
+    if isGenerated == nil then
+        isGenerated = true
     end
 
     -- If blocks is passed in at all, it's a serialized chunk.
@@ -90,7 +95,8 @@ function Chunk:serialize()
     return {
         self.position,
         blocks,
-        self.topLevelBlocks
+        self.topLevelBlocks,
+        self.isGenerated
     }
 end
 

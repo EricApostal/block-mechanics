@@ -24,7 +24,7 @@ local BlockService = Knit.CreateService {
 function BlockService:GetChunk(player, chunkPosition: Vector2)
     -- Now we must serialize the chunk and the blocks inside of it.
     local chunk = WorldData[BlockMap:toHash(chunkPosition)]
-    if (chunk == nil) then
+    if ((chunk == nil) or (not chunk.isGenerated)) then
         chunk = WorldGen:GenerateChunk(chunkPosition)
     end
 
