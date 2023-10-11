@@ -19,7 +19,14 @@ local function spawnTree(position: Vector3)
         local blockType = part.Name
 
         local block = Block:new(pos, blockType)
+        local chunk = WorldData[block:getChunkHash()]
+
         WorldBuilder:AddBlock(block)
+
+        if chunk then
+            chunk:setTopLevelBlock(block)
+        end
+        
         -- If the chunk already exists, send an add block request to manually replicate it.
         if (WorldData[block:getChunkHash()] ~= nil) then
             local BlockService = Knit.GetService("BlockService")
