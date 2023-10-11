@@ -22,7 +22,7 @@ local function getTouchingBlocks(block): number
         ["Front"] = Vector3.new(0,0,-1),
         ["Back"] = Vector3.new(0,0,1)
     }
-    for i, position in modifiers do
+    for _, position in modifiers do
         local blockPosition = block.position + position
         local blockHash = BlockMap:toHash(blockPosition)
         local chunkHash = BlockMap:toHash( BlockMap:getChunk(BlockMap:VoxelToRBX(blockPosition)))
@@ -72,8 +72,10 @@ local function drawChunk(hash)
         local instance = ReplicatedStorage.blocks[block.texture]:Clone()
         instance.Name = blockHash
         instance.Position = BlockMap:VoxelToRBX(block.position)
-        instance.Parent = workspace.blocks[hash]
-
+        -- I don't know why this is nil *sometimes*, maybe a race condition?
+        if workspace.blocks:FindFirstChild(hash) then
+            instance.Parent = workspace.blocks[hash]
+        end
         task.wait()
     end
 end
@@ -101,9 +103,28 @@ local function listener()
 
     BlockService.onBlockRemoved:Connect(function(blockArray)
         local block = Block:new(table.unpack(blockArray))
-        -- print(string.format("Removing block %s from chunk %s", block:getHash(), block:getChunkHash()))
         local blockInstance = workspace.blocks[block:getChunkHash()][block:getHash()]
+        WorldData[block:getChunkHash()].blocks[block:getHash()] = nil
         blockInstance:Destroy()
+        -- Now we need to look for the blocks around it and place if applicaple.
+        local modifiers = {
+            ["Top"] = Vector3.new(0,1,0),
+            ["Bottom"] = Vector3.new(0,-1,0),
+            ["Left"] = Vector3.new(-1,0,0),
+            ["Right"] = Vector3.new(1,0,0),
+            ["Front"] = Vector3.new(0,0,-1),
+            ["Back"] = Vector3.new(0,0,1)
+        }
+        for _, position in modifiers do
+            local blockPosition = block.position + position
+            local blockHash = BlockMap:toHash(blockPosition)
+            local chunkHash = BlockMap:toHash( BlockMap:getChunk(BlockMap:VoxelToRBX(blockPosition)))
+
+            if (WorldData[chunkHash] and WorldData[chunkHash].blocks[blockHash]) then
+                local block = WorldData[chunkHash].blocks[blockHash]
+                drawBlock(block)
+            end
+        end
     end)
 end
 
