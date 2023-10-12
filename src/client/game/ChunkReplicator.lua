@@ -41,27 +41,42 @@ local function drawChunk(hash)
 
     local lastBlockInstance = nil
     local iterations = 0
-    for blockHash, block in pairs(chunk.blocks) do
-        if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
-            continue
+
+    local function getChunkWithOptimizedBlocks(chunk): table
+        local parsedBlocks = {}
+        for blockHash, block in pairs(chunk.blocks) do
+            if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
+                continue
+            end
+
+            if (getTouchingBlocks(block) == 6) then
+                continue
+            end
+
+            if (block.position.Y == 0) then
+                continue
+            end
+
+            table.insert(parsedBlocks, block)
         end
+        return parsedBlocks
+    end
+    
 
-        if (getTouchingBlocks(block) == 6) then
-            continue
-        end
+    local optimized = getChunkWithOptimizedBlocks(chunk)
 
-        if (block.position.Y == 0) then
-            continue
-        end
+    -- sort optimized such that the blocks are in rows / cols
+    table.sort(optimized, function(a, b)
+        return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
+    end)
 
-        --[[
-            TODO: Sort the blocks such that they are structured properly in rows / cols.
-        ]]
-
-        -- if (lastBlockInstance ~= nil) and (WorldData[hash].blocks[lastBlockInstance.Name].texture == block.texture) and ( (iterations % 16) ~= 0) then
-        --     print("OPTIMIZED")
-        --     lastBlockInstance.Size = lastBlockInstance.Size + Vector3.new(3,0,0)
-        -- else
+    -- print(optimized)
+    for _, block in pairs(optimized) do
+        if (lastBlockInstance ~= nil) and (WorldData[hash].blocks[lastBlockInstance.Name].texture == block.texture) and(WorldData[hash].blocks[lastBlockInstance.Name].position.y == block.position.y) and ( (iterations % 16) ~= 0) then
+            -- print("OPTIMIZED")
+            lastBlockInstance.Size = lastBlockInstance.Size + Vector3.new(3,0,0)
+        else
+            local blockHash = block:getHash()
             local instance = ReplicatedStorage.blocks[block.texture]:Clone()
             instance.Name = blockHash
             instance.Position = BlockMap:VoxelToRBX(block.position)
@@ -70,8 +85,9 @@ local function drawChunk(hash)
                 instance.Parent = workspace.blocks[hash]
             end
             lastBlockInstance = instance
-        -- end
-        -- iterations += 1
+            -- task.wait()
+            iterations += 1
+        end
     end
 end
 
@@ -166,13 +182,13 @@ local function chunkListener()
             task.wait(0.1)
         end
 
-        for chunkHash, _ in pairs(WorldData) do
-            if (not proximityChunks[chunkHash]) then
-                WorldData[chunkHash] = nil
-                workspace.blocks[chunkHash]:Destroy()
-                task.wait(0.1)
-            end
-        end
+        -- for chunkHash, _ in pairs(WorldData) do
+        --     if (not proximityChunks[chunkHash]) then
+        --         WorldData[chunkHash] = nil
+        --         workspace.blocks[chunkHash]:Destroy()
+        --         task.wait(0.1)
+        --     end
+        -- end
 
         task.wait(1)
     end
