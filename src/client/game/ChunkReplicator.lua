@@ -59,7 +59,6 @@ local function drawChunk(hash)
         if workspace.blocks:FindFirstChild(hash) then
             instance.Parent = workspace.blocks[hash]
         end
-        task.wait()
     end
 end
 
@@ -151,7 +150,7 @@ local function chunkListener()
 
         for hash, chunk in pairs(toLoad) do
             task.spawn(function() drawChunk(chunk:getHash()) end)
-            task.wait()
+            task.wait(0.1)
         end
 
         for chunkHash, _ in pairs(WorldData) do
