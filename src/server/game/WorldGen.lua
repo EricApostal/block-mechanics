@@ -69,18 +69,19 @@ function WorldGen:GenerateChunk(position: Vector2)
                 local density = xnoise + ynoise + znoise + y
                 if density < 20 then
                     local formatted = string.format( "%s,%s,%s", x, y, z)
-                    heightArray[formatted] = formatted
+                    heightArray[formatted] = Vector3.new(x, y, z)
                 end
             end
             -- Now we need to parse the height array and create blocks.
             table.sort(heightArray, function(a,b)
-                return string.split(a, ",")[2] < string.split(b, ",")[2]
+                return a.Y < b.Y
             end)
+
             -- WorldBuilder:AddBlock(Block:new(heightArray[#heightArray], "grass"))
             -- table.remove(heightArray, #heightArray)
-            for _, posStr in heightArray do
+            for posStr, posVector in heightArray do
                 local _split = string.split(posStr, ",")
-                local pos = Vector3.new(_split[1], _split[2], _split[3])
+                local pos = posVector
                 WorldBuilder:AddBlock(Block:new(pos, "dirt"))
                 if not heightArray[string.format( "%s,%s,%s", pos.X, pos.Y + 1, pos.Z)] then
                     WorldBuilder:AddBlock(Block:new(Vector3.new(pos.X, pos.Y, pos.Z), "grass"))

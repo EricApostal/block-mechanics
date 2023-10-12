@@ -39,6 +39,8 @@ end
 local function drawChunk(hash)
     local chunk = WorldData[hash]
 
+    local lastBlockInstance = nil
+    local iterations = 0
     for blockHash, block in pairs(chunk.blocks) do
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
             continue
@@ -52,13 +54,25 @@ local function drawChunk(hash)
             continue
         end
 
-        local instance = ReplicatedStorage.blocks[block.texture]:Clone()
-        instance.Name = blockHash
-        instance.Position = BlockMap:VoxelToRBX(block.position)
-        -- I don't know why this is nil *sometimes*, maybe a race condition?
-        if workspace.blocks:FindFirstChild(hash) then
-            instance.Parent = workspace.blocks[hash]
-        end
+        --[[
+            TODO: Sort the blocks such that they are structured properly in rows / cols.
+        ]]
+
+        -- if (lastBlockInstance ~= nil) and (WorldData[hash].blocks[lastBlockInstance.Name].texture == block.texture) and ( (iterations % 16) ~= 0) then
+        --     print("OPTIMIZED")
+        --     lastBlockInstance.Size = lastBlockInstance.Size + Vector3.new(3,0,0)
+        -- else
+            local instance = ReplicatedStorage.blocks[block.texture]:Clone()
+            instance.Name = blockHash
+            instance.Position = BlockMap:VoxelToRBX(block.position)
+            -- I don't know why this is nil *sometimes*, maybe a race condition?
+            if workspace.blocks:FindFirstChild(hash) then
+                instance.Parent = workspace.blocks[hash]
+            end
+            lastBlockInstance = instance
+            task.wait()
+        -- end
+        -- iterations += 1
     end
 end
 
