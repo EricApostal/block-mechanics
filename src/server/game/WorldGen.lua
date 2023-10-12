@@ -54,21 +54,21 @@ function WorldGen:GenerateChunk(position: Vector2)
     local chunk =  WorldData[string.format("%s,%s",position.X, position.Y)]
 
     local seed = 160
-    local noisescale = 20
-    local amplitude = 50
+    local noisescale = 30
+    local amplitude = 18
+    local height = 64
 
     for x = startBlockPosition.X, startBlockPosition.X + 15 do
         for z = startBlockPosition.Z, startBlockPosition.Z + 15 do
-            for y = 0, 63 do
+            for y = 1, height do
                 local xnoise = math.noise(y/noisescale, z/noisescale, seed)*amplitude
                 local ynoise = math.noise(x/noisescale, z/noisescale, seed)*amplitude
                 local znoise = math.noise(x/noisescale, y/noisescale, seed)*amplitude
 
                 local density = xnoise + ynoise + znoise + y
-                if density < 50 then
+                if density < 20 then
                     local block = Block:new(Vector3.new(x, y, z), "grass")
                     WorldBuilder:AddBlock(block)
-                    chunk:setTopLevelBlock(block)
 
                     if (block:getChunkHash() ~= chunk.hash) then
                         error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")

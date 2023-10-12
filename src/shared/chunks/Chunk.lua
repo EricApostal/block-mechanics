@@ -56,16 +56,6 @@ function Chunk:getBlocks()
     return self.blocks
 end
 
--- Register a block as being at the top of a chunk. Useful for lazy rendering later.
-function Chunk:setTopLevelBlock(block)
-    self.topLevelBlocks[block:getHash()] = block
-end
-
--- Check if a block is top level.
-function Chunk:isTopLevelBlock(block)
-    return self.topLevelBlocks[block:getHash()] ~= nil
-end
-
 -- Adds a block to the chunk.
 function Chunk:addBlock(block)
     -- WARNING: THIS SHOULD ONLY BE CALLED BY WORLDGEN!

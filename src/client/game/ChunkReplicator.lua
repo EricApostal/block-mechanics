@@ -10,6 +10,8 @@ local Chunk = require(ReplicatedStorage.Common.chunks.Chunk)
 local BlockMap = require(ReplicatedStorage.Common.BlockMap)
 local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local WorldData = require(ReplicatedStorage.Common.world.WorldData)
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 
 -- Get the number of blocks touching the specified block.
 local function getTouchingBlocks(block): number
@@ -37,30 +39,8 @@ end
 local function drawChunk(hash)
     local chunk = WorldData[hash]
 
-    -- do top level chunks first
-    -- then do the rest of the chunks
-
-    for blockHash, block in pairs(chunk.topLevelBlocks) do
-        if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash) and (WorldData[hash].isGenerated == true)) then
-            continue
-        end
-
-        if (getTouchingBlocks(block) == 6) then
-            continue
-        end
-
-        local instance = ReplicatedStorage.blocks[block.texture]:Clone()
-        instance.Name = blockHash
-        instance.Position = BlockMap:VoxelToRBX(block.position)
-        instance.Parent = workspace.blocks[hash]
-    end
-
     for blockHash, block in pairs(chunk.blocks) do
         if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
-            continue
-        end
-
-        if (chunk.topLevelBlocks[blockHash]) then
             continue
         end
 
@@ -186,8 +166,38 @@ local function chunkListener()
     end
 end
 
+-- local function isPosVisible(pos): boolean
+--     local _, OnScreen = workspace.CurrentCamera:WorldToScreenPoint(pos)
+
+--     if OnScreen then
+--         if #workspace.CurrentCamera:GetPartsObscuringTarget({workspace.CurrentCamera.CFrame.Position, pos}, {}) == 0 then
+--             return true
+--         end
+--     end
+--     return false
+-- end
+
+-- local function initViewportBlockCheck()
+--     RunService.Heartbeat:Connect(function(deltaTime)
+--         for _, chunk in WorldData do
+--             for _, block in chunk.blocks do
+--                 local chunkHash = chunk:getHash()
+--                 local blockInstance = workspace.blocks[chunkHash]:FindFirstChild(block:getHash())
+--                 if not blockInstance and isPosVisible(block.position) then
+--                     drawBlock(block)
+--                 end
+
+--                 if blockInstance and not isPosVisible(blockInstance.Position) then
+--                     blockInstance:Destroy()
+--                 end
+--             end
+--         end
+--     end)
+-- end
+
 function ChunkReplicator:init()
     listener()
+    -- initViewportBlockCheck()
     task.spawn(chunkListener)
 end
 
