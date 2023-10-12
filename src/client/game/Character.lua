@@ -33,7 +33,7 @@ end
 
 function Character:init()
     handleMovement()
-    -- player.CameraMode = Enum.CameraMode.LockFirstPerson
+    player.CameraMode = Enum.CameraMode.LockFirstPerson
     workspace.Gravity = 80
 end
 
