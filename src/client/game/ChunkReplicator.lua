@@ -70,7 +70,6 @@ local function drawChunk(hash)
                 instance.Parent = workspace.blocks[hash]
             end
             lastBlockInstance = instance
-            task.wait()
         -- end
         -- iterations += 1
     end
