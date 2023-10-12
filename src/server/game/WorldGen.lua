@@ -60,24 +60,37 @@ function WorldGen:GenerateChunk(position: Vector2)
 
     for x = startBlockPosition.X, startBlockPosition.X + 15 do
         for z = startBlockPosition.Z, startBlockPosition.Z + 15 do
-            for y = 1, height do
+            local heightArray = {}
+            for y = 0, height do
                 local xnoise = math.noise(y/noisescale, z/noisescale, seed)*amplitude
                 local ynoise = math.noise(x/noisescale, z/noisescale, seed)*amplitude
                 local znoise = math.noise(x/noisescale, y/noisescale, seed)*amplitude
 
                 local density = xnoise + ynoise + znoise + y
                 if density < 20 then
-                    local block = Block:new(Vector3.new(x, y, z), "grass")
-                    WorldBuilder:AddBlock(block)
-
-                    if (block:getChunkHash() ~= chunk.hash) then
-                        error("Block is not in the correct chunk! This is a FATAL error / desync with chunk placement!")
-                    end
-
-                    -- if (math.random(1,100) == 1) then
-                    --     spawnTree(Vector3.new(x, calculatedY + 1, z))
-                    -- end
+                    local formatted = string.format( "%s,%s,%s", x, y, z)
+                    heightArray[formatted] = formatted
                 end
+            end
+            -- Now we need to parse the height array and create blocks.
+            table.sort(heightArray, function(a,b)
+                return string.split(a, ",")[2] < string.split(b, ",")[2]
+            end)
+            -- WorldBuilder:AddBlock(Block:new(heightArray[#heightArray], "grass"))
+            -- table.remove(heightArray, #heightArray)
+            for _, posStr in heightArray do
+                local _split = string.split(posStr, ",")
+                local pos = Vector3.new(_split[1], _split[2], _split[3])
+                WorldBuilder:AddBlock(Block:new(pos, "dirt"))
+                if not heightArray[string.format( "%s,%s,%s", pos.X, pos.Y + 1, pos.Z)] then
+                    WorldBuilder:AddBlock(Block:new(Vector3.new(pos.X, pos.Y, pos.Z), "grass"))
+                else
+                    WorldBuilder:AddBlock(Block:new(Vector3.new(pos.X, pos.Y, pos.Z), "dirt"))
+                end
+
+                -- if (math.random(1,100) == 1) then
+                --     spawnTree(Vector3.new(x, calculatedY + 1, z))
+                -- end
             end
         end
     end
