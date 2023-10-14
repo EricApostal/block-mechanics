@@ -63,29 +63,27 @@ local function drawChunk(hash)
     local optimized = getChunkWithOptimizedBlocks(chunk)
 
     -- sort optimized such that the blocks are in rows / cols
-    table.sort(optimized, function(a, b)
-        return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
-    end)
+    -- table.sort(optimized, function(a, b)
+    --     return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
+    -- end)
+
+    local cacheInstances = {}
+    local cachePositions = {}
+
+    while #workspace.blockCache:GetChildren() < #optimized do
+        task.wait()
+    end
 
     for _, block in pairs(optimized) do
         local blockHash = block:getHash()
 
-        local _cacheInstance = workspace.blockCache:FindFirstChild(block.texture)
-        if _cacheInstance then
-            _cacheInstance.Name = blockHash
-            _cacheInstance.Position = BlockMap:VoxelToRBX(block.position)
-            _cacheInstance.Parent = workspace.blocks[hash]
-        else
-            -- print("Creating New")
-            local instance = ReplicatedStorage.blocks[block.texture]:Clone()
-            instance.Name = blockHash
-            instance.Position = BlockMap:VoxelToRBX(block.position)
-            
-            if workspace.blocks:FindFirstChild(hash) then
-                instance.Parent = workspace.blocks[hash]
-            end
-        end
+        local _cacheInstance = workspace.blockCache:WaitForChild("grass")
+        _cacheInstance.Name = blockHash
+        _cacheInstance.Parent = workspace.blocks[hash]
+        table.insert(cacheInstances, _cacheInstance)
+        table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
     end
+    workspace:BulkMoveTo(cacheInstances, cachePositions)
 end
 
 local function drawBlock(block)
@@ -153,10 +151,10 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1
+    local loadRadius = 2
 
     -- Radius to not delete
-    local cacheRadius = 4
+    local cacheRadius = 2
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
@@ -211,13 +209,13 @@ local function createBlockCache()
     ]]
 
     RunService.RenderStepped:Connect(function(deltaTime)
-        ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
+            ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end)
 end
 
 function ChunkReplicator:init()
     listener()
-    for _ = 1,10 do
+    for _ = 1,20 do
         createBlockCache()
     end
     task.spawn(chunkListener)
