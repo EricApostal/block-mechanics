@@ -13,6 +13,8 @@ local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
+local view_distance = 1
+
 -- Get the number of blocks touching the specified block.
 local function getTouchingBlocks(block): number
     local touchingBlocks = 0
@@ -167,7 +169,7 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1
+    local loadRadius = 1    
 
     -- Radius to not delete
     local cacheRadius = 1
@@ -200,27 +202,28 @@ local function chunkListener()
             end
         end
 
-        for hash, chunk in pairs(toLoad) do
-            task.spawn(function() drawChunk(chunk:getHash()) end)
-            task.wait(0.1)
+        for _, chunk in pairs(toLoad) do
+            drawChunk(chunk:getHash())
+            -- task.wait(0.1)
         end
 
         local instances = {}
         local positions = {}
+
         for chunkHash, _ in pairs(WorldData) do
             if (not cacheChunks[chunkHash]) then
-                WorldData[chunkHash] = nil
                 for _, block in pairs(workspace.blocks[chunkHash]:GetChildren()) do
-                    table.insert(instances, block)
-                    table.insert(positions, CFrame.new(0,500,0))
-                    block.Name = "grass"
+                    block:Destroy()
+                    -- block.Parent = workspace.blockCache
+                    -- table.insert(instances, block)
+                    -- table.insert(positions, CFrame.new(0,500,0))
+                    -- task.spawn(function()
+                    --     block.Name = "grass"
+                    -- end)
                 end
-                workspace:BulkMoveTo(instances, positions)
-                -- Shitty, but prevents race conditions
-                for _, block in pairs(workspace.blocks[chunkHash]:GetChildren()) do
-                    block.Parent = workspace.blockCache
-                end
-                task.wait(0.1)
+                -- workspace:BulkMoveTo(instances, positions)
+                -- WorldData[chunkHash] = nil
+                -- task.wait(0.1)
             end
         end
 
@@ -235,19 +238,25 @@ local function createBlockCache()
         and then move them into the workspace when they're ready.
     ]]
 
-    RunService.RenderStepped:Connect(function(deltaTime)
-        if (#workspace.blockCache:GetChildren() > 5000) then
-            return
-        end
+    local allowedCache = 6000
+
+    --- initial cache
+    for _ = 1,allowedCache do
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
-    end)
+    end
+
+    for _ = 1, 10 do
+        RunService.RenderStepped:Connect(function()
+            if (#workspace.blockCache:GetChildren() < allowedCache) then
+                ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
+            end
+        end)
+    end
 end
 
 function ChunkReplicator:init()
     listener()
-    for _ = 1,5 do
-        createBlockCache()
-    end
+    task.spawn(createBlockCache)
     task.spawn(chunkListener)
 end
 
