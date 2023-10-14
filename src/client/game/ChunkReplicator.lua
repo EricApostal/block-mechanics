@@ -39,9 +39,6 @@ end
 local function drawChunk(hash)
     local chunk = WorldData[hash]
 
-    local lastBlockInstance = nil
-    local iterations = 0
-
     local function getChunkWithOptimizedBlocks(chunk): table
         local parsedBlocks = {}
         for blockHash, block in pairs(chunk.blocks) do
@@ -72,10 +69,6 @@ local function drawChunk(hash)
 
     -- print(optimized)
     for _, block in pairs(optimized) do
-        if (lastBlockInstance ~= nil) and (WorldData[hash].blocks[lastBlockInstance.Name].texture == block.texture) and(WorldData[hash].blocks[lastBlockInstance.Name].position.y == block.position.y) and ( (iterations % 16) ~= 0) then
-            -- print("OPTIMIZED")
-            lastBlockInstance.Size = lastBlockInstance.Size + Vector3.new(3,0,0)
-        else
             local blockHash = block:getHash()
             local instance = ReplicatedStorage.blocks[block.texture]:Clone()
             instance.Name = blockHash
@@ -84,11 +77,7 @@ local function drawChunk(hash)
             if workspace.blocks:FindFirstChild(hash) then
                 instance.Parent = workspace.blocks[hash]
             end
-            lastBlockInstance = instance
-            -- task.wait()
-            iterations += 1
         end
-    end
 end
 
 local function drawBlock(block)
@@ -155,25 +144,36 @@ end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
-    local radius = 1
+    -- Radius to actively load
+    local loadRadius = 1
+
+    -- Radius to not delete
+    local cacheRadius = 4
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
         local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
 
         -- Load the chunks around us.
-        local proximityChunks = {}
-
+        local loadChunks = {}
+        local cacheChunks = {}
         local toLoad = {}
 
-        for x = -radius, radius do
-            for y = -radius, radius do
+        for x = -loadRadius, loadRadius do
+            for y = -loadRadius, loadRadius do
                 local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
-                proximityChunks[chunkHash] = true
+                loadChunks[chunkHash] = true
                 if ((not WorldData[chunkHash]) or (WorldData[chunkHash].isGenerated == false)) then
                     local chunk = loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
                     toLoad[chunkHash] = chunk
                 end
+            end
+        end
+
+        for x = -cacheRadius, cacheRadius do
+            for y = -cacheRadius, cacheRadius do
+                local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
+                cacheChunks[chunkHash] = true
             end
         end
 
@@ -182,13 +182,13 @@ local function chunkListener()
             task.wait(0.1)
         end
 
-        -- for chunkHash, _ in pairs(WorldData) do
-        --     if (not proximityChunks[chunkHash]) then
-        --         WorldData[chunkHash] = nil
-        --         workspace.blocks[chunkHash]:Destroy()
-        --         task.wait(0.1)
-        --     end
-        -- end
+        for chunkHash, _ in pairs(WorldData) do
+            if (not cacheChunks[chunkHash]) then
+                WorldData[chunkHash] = nil
+                workspace.blocks[chunkHash]:Destroy()
+                task.wait(0.1)
+            end
+        end
 
         task.wait(1)
     end
