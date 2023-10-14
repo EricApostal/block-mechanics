@@ -78,6 +78,22 @@ local function drawChunk(hash)
         local blockHash = block:getHash()
 
         local _cacheInstance = workspace.blockCache:WaitForChild("grass")
+        local _cacheTextureInstances = _cacheInstance:GetChildren()
+
+        local _cacheTextures = {}
+        for _, texture in ipairs(_cacheTextureInstances) do
+            if (texture:IsA("Texture")) then
+                _cacheTextures[texture.Face.Value] = texture
+            end
+        end
+        -- Now we can get the texture, and copy the texture from the block in replicatedstorage, then apply it
+        for i, texture in ipairs(ReplicatedStorage.blocks[block.texture]:GetChildren()) do
+            if (texture:IsA("Texture")) then
+                local face = texture.Face.Value
+                _cacheTextures[face].Texture = tostring(texture.Texture)
+            end
+        end
+
         _cacheInstance.Name = blockHash
         _cacheInstance.Parent = workspace.blocks[hash]
         table.insert(cacheInstances, _cacheInstance)
