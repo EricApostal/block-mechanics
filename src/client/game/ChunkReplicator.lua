@@ -67,17 +67,25 @@ local function drawChunk(hash)
         return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
     end)
 
-    -- print(optimized)
     for _, block in pairs(optimized) do
-            local blockHash = block:getHash()
+        local blockHash = block:getHash()
+
+        local _cacheInstance = workspace.blockCache:FindFirstChild(block.texture)
+        if _cacheInstance then
+            _cacheInstance.Name = blockHash
+            _cacheInstance.Position = BlockMap:VoxelToRBX(block.position)
+            _cacheInstance.Parent = workspace.blocks[hash]
+        else
+            -- print("Creating New")
             local instance = ReplicatedStorage.blocks[block.texture]:Clone()
             instance.Name = blockHash
             instance.Position = BlockMap:VoxelToRBX(block.position)
-            -- I don't know why this is nil *sometimes*, maybe a race condition?
+            
             if workspace.blocks:FindFirstChild(hash) then
                 instance.Parent = workspace.blocks[hash]
             end
         end
+    end
 end
 
 local function drawBlock(block)
@@ -152,6 +160,7 @@ local function chunkListener()
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
+        print(#workspace.blockCache:GetChildren())
         local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
 
         -- Load the chunks around us.
@@ -194,38 +203,23 @@ local function chunkListener()
     end
 end
 
--- local function isPosVisible(pos): boolean
---     local _, OnScreen = workspace.CurrentCamera:WorldToScreenPoint(pos)
+local function createBlockCache()
+    --[[
+        Most of the chunk loading lag is due to Roblox creating new parts, not inheritly that they exist.
+        So if we create a bunch of parts in the workspace, then use workspace:MoveBulk (I think), we can just load the blocks async,
+        and then move them into the workspace when they're ready.
+    ]]
 
---     if OnScreen then
---         if #workspace.CurrentCamera:GetPartsObscuringTarget({workspace.CurrentCamera.CFrame.Position, pos}, {}) == 0 then
---             return true
---         end
---     end
---     return false
--- end
-
--- local function initViewportBlockCheck()
---     RunService.Heartbeat:Connect(function(deltaTime)
---         for _, chunk in WorldData do
---             for _, block in chunk.blocks do
---                 local chunkHash = chunk:getHash()
---                 local blockInstance = workspace.blocks[chunkHash]:FindFirstChild(block:getHash())
---                 if not blockInstance and isPosVisible(block.position) then
---                     drawBlock(block)
---                 end
-
---                 if blockInstance and not isPosVisible(blockInstance.Position) then
---                     blockInstance:Destroy()
---                 end
---             end
---         end
---     end)
--- end
+    RunService.RenderStepped:Connect(function(deltaTime)
+        ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
+    end)
+end
 
 function ChunkReplicator:init()
     listener()
-    -- initViewportBlockCheck()
+    for _ = 1,10 do
+        createBlockCache()
+    end
     task.spawn(chunkListener)
 end
 
