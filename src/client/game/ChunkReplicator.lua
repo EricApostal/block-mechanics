@@ -167,10 +167,10 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 2
+    local loadRadius = 1
 
     -- Radius to not delete
-    local cacheRadius = 2
+    local cacheRadius = 1
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
@@ -205,10 +205,21 @@ local function chunkListener()
             task.wait(0.1)
         end
 
+        local instances = {}
+        local positions = {}
         for chunkHash, _ in pairs(WorldData) do
             if (not cacheChunks[chunkHash]) then
                 WorldData[chunkHash] = nil
-                workspace.blocks[chunkHash]:Destroy()
+                for _, block in pairs(workspace.blocks[chunkHash]:GetChildren()) do
+                    table.insert(instances, block)
+                    table.insert(positions, CFrame.new(0,500,0))
+                    block.Name = "grass"
+                end
+                workspace:BulkMoveTo(instances, positions)
+                -- Shitty, but prevents race conditions
+                for _, block in pairs(workspace.blocks[chunkHash]:GetChildren()) do
+                    block.Parent = workspace.blockCache
+                end
                 task.wait(0.1)
             end
         end
@@ -225,13 +236,16 @@ local function createBlockCache()
     ]]
 
     RunService.RenderStepped:Connect(function(deltaTime)
-            ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
+        if (#workspace.blockCache:GetChildren() > 5000) then
+            return
+        end
+        ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end)
 end
 
 function ChunkReplicator:init()
     listener()
-    for _ = 1,20 do
+    for _ = 1,5 do
         createBlockCache()
     end
     task.spawn(chunkListener)
