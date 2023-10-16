@@ -156,6 +156,8 @@ local function loadChunk(x, y)
     local chunk
 
     BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
+        print("array: ")
+        print(chunkArray)
         chunk = Chunk:new(table.unpack(chunkArray))
         WorldData[chunkHash] = chunk
     end)
@@ -169,10 +171,12 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1    
+    local loadRadius = 1
 
+    -- local chunk = loadChunk(0,1)
+    -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 1
+    local cacheRadius = 10
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
