@@ -169,7 +169,7 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 2
+    local loadRadius = 1
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
@@ -206,7 +206,6 @@ local function chunkListener()
 
         for _, chunk in pairs(toLoad) do
             drawChunk(chunk:getHash())
-            -- task.wait(0.1)
         end
 
         local instances = {}
@@ -240,14 +239,14 @@ local function createBlockCache()
         and then move them into the workspace when they're ready.
     ]]
 
-    local allowedCache = 6000
+    local allowedCache = 10000
 
     --- initial cache
     for _ = 1,allowedCache do
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end
 
-    for _ = 1, 15 do
+    for _ = 1, 20 do
         RunService.RenderStepped:Connect(function()
             if (#workspace.blockCache:GetChildren() < allowedCache) then
                 ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
