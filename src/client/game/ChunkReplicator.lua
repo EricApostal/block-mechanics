@@ -156,8 +156,6 @@ local function loadChunk(x, y)
     local chunk
 
     BlockService:GetChunk(Vector2.new(x,y)):andThen(function(chunkArray)
-        print("array: ")
-        print(chunkArray)
         chunk = Chunk:new(table.unpack(chunkArray))
         WorldData[chunkHash] = chunk
     end)
@@ -171,7 +169,7 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1
+    local loadRadius = 2
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
@@ -249,7 +247,7 @@ local function createBlockCache()
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end
 
-    for _ = 1, 10 do
+    for _ = 1, 15 do
         RunService.RenderStepped:Connect(function()
             if (#workspace.blockCache:GetChildren() < allowedCache) then
                 ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache

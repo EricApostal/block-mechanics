@@ -110,8 +110,12 @@ function WorldGen:GenerateChunk(position: Vector2)
     end
     local blocks = http:JSONDecode(raw)
     print("decoded!")
-    for hash, block in blocks do
-        local blockObj = Block:new(Vector3.new(block.x, block.y, block.z), "grass")
+    for _, block in blocks do
+        local blockTexture = "grass"
+        if ReplicatedStorage.blocks:FindFirstChild(block.t) then
+           blockTexture = block.t
+        end
+        local blockObj = Block:new(Vector3.new(block.x, block.y, block.z), blockTexture)
         WorldBuilder:AddBlock(blockObj)
     end
     local chunk =  WorldData[string.format("%s,%s",position.X, position.Y)]
