@@ -109,8 +109,6 @@ minetest.register_chatcommand("host", {
         interact = true,
     },
     func = function(name, param)
-        os.execute("mkdir "..currPath.."/requests")
-        os.execute("mkdir "..currPath.."/responses")
         checkRequests()
     end,
 })
@@ -126,6 +124,6 @@ minetest.register_chatcommand("pos", {
     end,
 })
 
-minetest.register_globalstep(function()
-    checkRequests()
-end)
+-- minetest.register_globalstep(function()
+--     checkRequests()
+-- end)
