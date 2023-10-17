@@ -151,7 +151,7 @@ local function listener()
     end)
 end
 
-local function loadChunk(x, y)
+local function requestChunk(x, y)
     local chunkHash = string.format("%s,%s", x,y)
     local chunk
 
@@ -162,14 +162,32 @@ local function loadChunk(x, y)
 
     -- Shit async -> sync
     while not chunk do task.wait() end
-
     return chunk
+end
+
+local function requestChunkGroup(groupTable)
+    local chunkGroup = {}
+    local complete = false
+    print("Requesting Data: ")
+    print(groupTable)
+    BlockService:GetChunkGroup(groupTable):andThen(function(chunks)
+        for _, chunkArray in chunks do
+            local chunk = Chunk:new(table.unpack(chunkArray))
+            table.insert(chunkGroup, chunk)
+            WorldData[chunk:getHash()] = chunk
+        end
+        complete = true
+    end)
+
+    -- Shit async -> sync
+    while not complete do task.wait() end
+    return chunkGroup
 end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1
+    local loadRadius = 2
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
@@ -186,13 +204,13 @@ local function chunkListener()
         local cacheChunks = {}
         local toLoad = {}
 
+        local toRequest = {}
         for x = -loadRadius, loadRadius do
             for y = -loadRadius, loadRadius do
                 local chunkHash = string.format("%s,%s", chunkPosition.X + x, chunkPosition.Y + y)
-                loadChunks[chunkHash] = true
-                if ((not WorldData[chunkHash]) or (WorldData[chunkHash].isGenerated == false)) then
-                    local chunk = loadChunk(chunkPosition.X + x, chunkPosition.Y + y)
-                    toLoad[chunkHash] = chunk
+                -- print(x,y)
+                if (not WorldData[chunkHash]) then
+                    table.insert(toRequest,Vector2.new(chunkPosition.X + x, chunkPosition.Y + y))
                 end
             end
         end
@@ -204,7 +222,23 @@ local function chunkListener()
             end
         end
 
+        -- for chunkHash, _ in pairs(toRequest) do
+        --     local split = chunkHash:split(",")
+        --     local chunk = requestChunk(split[1], split[2])
+        --     table.insert(toLoad, chunk)
+        -- end
+        print("toRequest:")
+        for k,v in pairs(toRequest) do
+            print(k,v)
+        end
+        local chunks = requestChunkGroup(toRequest)
+        for _, chunk in pairs(chunks) do
+            table.insert(toLoad, chunk)
+            -- print(WorldData[string.format("%s,%s",chunk.position.X, chunk.position.Y)])
+        end
+
         for _, chunk in pairs(toLoad) do
+            -- print(WorldData[chunk])
             drawChunk(chunk:getHash())
         end
 
@@ -239,14 +273,14 @@ local function createBlockCache()
         and then move them into the workspace when they're ready.
     ]]
 
-    local allowedCache = 10000
+    local allowedCache = 20000
 
     --- initial cache
     for _ = 1,allowedCache do
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end
 
-    for _ = 1, 20 do
+    for _ = 1, 30 do
         RunService.RenderStepped:Connect(function()
             if (#workspace.blockCache:GetChildren() < allowedCache) then
                 ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache

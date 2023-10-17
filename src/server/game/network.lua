@@ -31,11 +31,46 @@ function BlockService:GetChunk(player, chunkPosition: Vector2)
     return chunk:serialize()
 end
 
+function BlockService:GetChunkGroup(player, chunks)
+    local toGenerate = {}
+    local alreadyGenerated = {}
+    local chunkGroup = {}
+
+    for _, chunkPosition in chunks do
+        -- Now we must serialize the chunk and the blocks inside of it.
+        local chunk = WorldData[BlockMap:toHash(chunkPosition)]
+        if (chunk == nil) then
+            table.insert(toGenerate, chunkPosition)
+        else
+            table.insert(alreadyGenerated, chunk)
+        end
+    end
+    local generatedChunks = WorldGen:GenerateChunkGroup(toGenerate)
+    local toSerialize = {}
+    -- table.unpack(generatedChunks), table.unpack(alreadyGenerated)
+    for _, chunk in pairs(generatedChunks) do
+        table.insert(toSerialize, chunk)
+    end
+    for _, chunk in pairs(alreadyGenerated) do
+        table.insert(toSerialize, chunk)
+    end
+    local serialized = {}
+    for _, chunk in pairs(toSerialize) do
+        table.insert(serialized, chunk:serialize())
+    end
+
+    return serialized
+end
+
 --// Client Functions \\--
 
 -- Get the contents of a chunk by chunk hash.
 function BlockService.Client:GetChunk(player, chunkPosition: Vector2)
     return BlockService:GetChunk(player, chunkPosition)
+end
+
+function BlockService.Client:GetChunkGroup(player, chunks)
+    return BlockService:GetChunkGroup(player, chunks)
 end
 
 -- Assumes the block is being placed by a player.

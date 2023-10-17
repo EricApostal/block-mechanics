@@ -13,6 +13,7 @@ function blockMap:VoxelToRBX(block)
     return Vector3.new( math.round(block.X*3), math.round(block.Y*3), math.round(block.Z*3) )
 end
 
+-- Gets the position of a chunk or block in voxel coordinates.
 function blockMap:getChunk(position)
     local pos
 
