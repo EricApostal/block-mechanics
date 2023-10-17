@@ -1,17 +1,15 @@
--- local ie = minetest.request_insecure_environment()
--- ie.package.path = ie.package.path .. ";/home/eric/.luarocks/share/lua/5.1/?.lua;/home/eric/.luarocks/share/lua/5.1/?/init.lua"
--- ie.package.cpath = ie.package.cpath .. ";/home/eric/.luarocks/lib64/lua/5.1/?.so"
-
--- local request = ie.require("http.request")
--- local pegasus = ie.require('pegasus')
--- local currPath = "/home/eric/.minetest/mods/minetest_rblx_chunkgen"
+local ie = minetest.request_insecure_environment()
+local http = minetest.request_http_api()
 local currPath = "/home/ubuntu/.minetest/mods/rblx_chunkgen"
 
+print("started chunkgen bridge")
+
 local function getChunk(x, y, callback)
+    print("running getChunk()!")
     local chunkData = {}
 
-    local pos_min = vector.new(x * 16, -64, y * 16)
-    local pos_max = vector.new(x * 16 + 15, 128, y * 16 + 15)
+    local pos_min = vector.new(x * 16, 0, y * 16)
+    local pos_max = vector.new(x * 16 + 15, 256, y * 16 + 15)
 
     local iters = 0
     local function runGetChunkThing()
@@ -74,30 +72,36 @@ end
 
 -- local alreadyRequested = {}
 local function checkRequests()
-    local _pending, err = io.popen("ls -pa "..currPath.."/requests".. "| grep -v /")
-    if _pending == nil then
-	minetest.log("Pending is nil, exiting")
-	minetest.log(err)
-        return
-    end
-    local pending = _pending:lines()
-    
-    
-    for file in pending do
-        print("Found file "..file..", parsing...")
-        local split = split(file:gsub(".txt",""):gsub("c",""), ",")
-        local x = tonumber(split[1])
-        local y = tonumber(split[2])
-        getChunk(x,y,function(chunkData)
-            minetest.log("Got chunk "..x..","..y..", writing to file...")
-            file = io.open(currPath.."/responses/c"..split[1]..","..split[2]..".txt", "w")
-            io.output(file)
-            io.write(minetest.write_json(chunkData))
-            io.close(file)
-            os.remove(currPath.."/requests/c"..split[1]..","..split[2]..".txt")
+    -- Use Long Poll to wait for hash, then do request
+    local GETRequest = {
+        url="http://localhost:8080/local/recieverequest",
+        timeout = 10000,
+        method = "GET",
+    }
+    http.fetch(GETRequest, function(data)
+        local hash = data["data"]
+        print("Full Return: ")
+        print(dump(data))
+        print("Got hash: "..hash)
+        print("Split: ")
+        print(dump(split(hash, ",")))
+        local x = tonumber(split(hash, ",")[1])
+        local y = tonumber(split(hash, ",")[2])
+
+        getChunk(x,y,function(blocks)
+            local POSTRequest = {
+                url="http://localhost:8080/local/sendrequest",
+                timeout = 10000,
+                method = "POST",
+                data = '{"hash": "0,0","blocks": {"1,1": {"t": "grass"}}}',--{hash=hash, blocks=blocks},
+                extra_headers = { "Content-Type", "application/json" }
+            }
+            print("GetChunk called, sending POST...")
+            http.fetch(POSTRequest, function(ret)
+                print("POST returned: "..ret)
+            end)
         end)
-    end
-    _pending:close()
+    end)
 end
 
 minetest.register_chatcommand("host", {

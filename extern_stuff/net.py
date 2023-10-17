@@ -6,24 +6,39 @@ import requests
 
 app = Flask(__name__)
 
-def _getChunk(x,y):
-    filename = f"c{x},{y}.txt"
+queue = []
+responses = {}
 
-    f = open(f"requests/{filename}", "w")
-    f.write("")
-    f.close()
-    
-    print("Waiting for chunk gen")
-    while not os.path.isfile(f"responses/{filename}"):
+def _getChunk(hash):
+    print(f"added hash {hash} to queue, waiting for response...")
+    # Add hash to queue
+    queue.insert(0,hash)
+    # Wait for response
+    while hash not in responses:
         time.sleep(0.1)
 
-    print("Chunk gen happened!")
-    fileContent = ''
-    while fileContent == '':
-        fileContent = open(f'responses/{filename}').read()
+        # Add to responses, taken care of elsewhere
+    print(f"got response for hash {hash}")
+    return responses.pop(hash)
 
-    # os.remove(f"responses/{filename}")
-    return fileContent
+# For minetest mod to long poll
+@app.route('/local/recieverequest')
+def pollRequest():
+    while queue == []:
+        time.sleep(0.1)
+    
+    return queue.pop(0)
+
+# For minetest mod to send request back
+@app.route('/local/sendrequest',  methods=['POST'])
+def sendRequest():
+    print("Got post request...")
+    data = request.json
+    responses[data["hash"]] = data["blocks"]
+    print(responses)
+    return "OK"
+    # return {"hash": chunkHash, "blocks": data["blocks"]}
+    # return chunkHash
 
 @app.route('/chunk')
 def getChunk():
@@ -32,15 +47,14 @@ def getChunk():
     if x == None or y == None:
         return "Invalid URL params"
 
-    return _getChunk(x,y)
+    return _getChunk(x+","+y)
 
 @app.route('/chunkgroup')
 def getChunkGroup():
     chunksIn = request.args.getlist("chunk")
     chunksOut = {}
-    for chunk in chunksIn:
-        x,y = chunk.split(",")
-        chunksOut[chunk] = _getChunk(x,y)
+    for chunkHash in chunksIn:
+        chunksOut[chunkHash] = _getChunk(chunkHash)
         
     return chunksOut
 
