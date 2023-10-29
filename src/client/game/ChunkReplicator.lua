@@ -231,15 +231,17 @@ local function chunkListener()
         for k,v in pairs(toRequest) do
             print(k,v)
         end
-        local chunks = requestChunkGroup(toRequest)
-        for _, chunk in pairs(chunks) do
-            table.insert(toLoad, chunk)
-            -- print(WorldData[string.format("%s,%s",chunk.position.X, chunk.position.Y)])
-        end
+        if (#toRequest > 0) then
+            local chunks = requestChunkGroup(toRequest)
+            for _, chunk in pairs(chunks) do
+                table.insert(toLoad, chunk)
+                -- print(WorldData[string.format("%s,%s",chunk.position.X, chunk.position.Y)])
+            end
 
-        for _, chunk in pairs(toLoad) do
-            -- print(WorldData[chunk])
-            drawChunk(chunk:getHash())
+            for _, chunk in pairs(toLoad) do
+                -- print(WorldData[chunk])
+                drawChunk(chunk:getHash())
+            end
         end
 
         local instances = {}
