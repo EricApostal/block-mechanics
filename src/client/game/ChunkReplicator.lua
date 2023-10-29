@@ -192,11 +192,10 @@ local function chunkListener()
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 10
+    local cacheRadius = 2
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
-        print(#workspace.blockCache:GetChildren())
         local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
 
         -- Load the chunks around us.
@@ -227,10 +226,6 @@ local function chunkListener()
         --     local chunk = requestChunk(split[1], split[2])
         --     table.insert(toLoad, chunk)
         -- end
-        print("toRequest:")
-        for k,v in pairs(toRequest) do
-            print(k,v)
-        end
         if (#toRequest > 0) then
             local chunks = requestChunkGroup(toRequest)
             for _, chunk in pairs(chunks) do
@@ -241,6 +236,7 @@ local function chunkListener()
             for _, chunk in pairs(toLoad) do
                 -- print(WorldData[chunk])
                 drawChunk(chunk:getHash())
+                task.wait(.1)
             end
         end
 
@@ -250,17 +246,17 @@ local function chunkListener()
         for chunkHash, _ in pairs(WorldData) do
             if (not cacheChunks[chunkHash]) then
                 for _, block in pairs(workspace.blocks[chunkHash]:GetChildren()) do
-                    block:Destroy()
-                    -- block.Parent = workspace.blockCache
-                    -- table.insert(instances, block)
-                    -- table.insert(positions, CFrame.new(0,500,0))
-                    -- task.spawn(function()
-                    --     block.Name = "grass"
-                    -- end)
+                    -- block:Destroy()
+                    block.Parent = workspace.blockCache
+                    table.insert(instances, block)
+                    table.insert(positions, CFrame.new(0,500,0))
+                    task.spawn(function()
+                        block.Name = "grass"
+                    end)
                 end
-                -- workspace:BulkMoveTo(instances, positions)
-                -- WorldData[chunkHash] = nil
-                -- task.wait(0.1)
+                workspace:BulkMoveTo(instances, positions)
+                WorldData[chunkHash] = nil
+                task.wait(0.1)
             end
         end
 
@@ -275,7 +271,7 @@ local function createBlockCache()
         and then move them into the workspace when they're ready.
     ]]
 
-    local allowedCache = 20000
+    local allowedCache = 10000
 
     --- initial cache
     for _ = 1,allowedCache do
