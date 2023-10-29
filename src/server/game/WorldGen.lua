@@ -98,6 +98,10 @@ function WorldGen:GenerateChunkGroup(chunksToGenerate: table)
     end
     
     -- local raw = http:GetAsync("http://193.122.131.242:8080/chunkgroup?chunk=-1,-1&chunk=-1,0")
+    if encoded == '' then
+        print("Was about to request blank data, ignoring...")
+        return {}
+    end
     print("endpoint: ")
     print("http://193.122.131.242:8080/chunkgroup?"..encoded)
     local raw = ''
