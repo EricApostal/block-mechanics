@@ -187,12 +187,12 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 2
+    local loadRadius = 4
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 2
+    local cacheRadius = 4
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
