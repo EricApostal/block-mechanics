@@ -62,7 +62,7 @@ local function parseChunk(blocks, position)
     local didBlockCheck = false
     local lastChunk = nil
     print("parsing chunk "..position.X..","..position.Y)
-
+    -- print(blocks)
     for _, block in blocks do
         local blockTexture = "grass"
         if ReplicatedStorage.blocks:FindFirstChild(block.t) then
@@ -98,27 +98,24 @@ function WorldGen:GenerateChunkGroup(chunksToGenerate: table)
     end
     
     -- local raw = http:GetAsync("http://193.122.131.242:8080/chunkgroup?chunk=-1,-1&chunk=-1,0")
+    print("endpoint: ")
+    print("http://193.122.131.242:8080/chunkgroup?"..encoded)
     local raw = ''
     while raw == '' do
         raw = http:GetAsync("http://193.122.131.242:8080/chunkgroup?"..encoded)
     end
     print("decoding chunks...")
-    local decodedChunks = http:JSONDecode(raw)
+    local data = http:JSONDecode(raw)
     print("decoded chunks.")
-    for hash, rawBlocks in decodedChunks do
-        print("decoding blocks...")
-        -- print(rawBlocks)
-        pcall(function()
-            local blocks = http:JSONDecode(rawBlocks)
-            print("decoded blocks.")
-            local _s = string.split(hash, ",")
-            local x = _s[1]
-            local y = _s[2]
-            local position = Vector2.new(x,y)
-            local parsed = parseChunk(blocks, position)
-            table.insert(chunks, parsed)
-    end)
+    for hash, blocks in data["chunks"] do
+        local _s = string.split(hash, ",")
+        local x = _s[1]
+        local y = _s[2]
+        local position = Vector2.new(x,y)
+        local parsed = parseChunk(blocks, position)
+        table.insert(chunks, parsed)
     end
+    print("returning chunks!")
     return chunks
 end
 
