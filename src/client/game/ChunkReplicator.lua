@@ -38,9 +38,73 @@ local function getTouchingBlocks(block): number
     return touchingBlocks
 end
 
+local function isBlockAtWorldEdge(chunk, block): boolean
+            -- If so, continue
+            local xChunks = {}
+            local yChunks = {}
+            -- make a list of every position
+            for _, chunkData in pairs(WorldData) do
+                table.insert(xChunks, chunkData.position.x)
+                table.insert(yChunks, chunkData.position.y)
+            end
+
+            local xMax = 0
+            local yMax = 0
+            local xMin = 0
+            local yMin = 0
+            for _, xPos in pairs(xChunks) do
+                if xPos > xMax then
+                    xMax = xPos
+                end
+                if xPos < xMin then
+                    xMin = xPos
+                end
+            end
+
+            for _, yPos in pairs(yChunks) do
+                if yPos > yMax then
+                    yMax = yPos
+                end
+                if yPos < yMin then
+                    yMin = yPos
+                end
+            end
+
+            -- if (chunk.position.X >= xMax or chunk.position.X <= xMin or chunk.position.Y >= yMax or chunk.position.Y <= yMin) then
+                -- Now we need to check if the block is at the edge of the chunk
+            if (chunk.position.X >= xMax) then
+                local outOfBoundsChunkPosition = BlockMap:getChunk(BlockMap:VoxelToRBX(Vector3.new(block.position.X + 1, block.position.Y, block.position.Z)))
+                if outOfBoundsChunkPosition.X ~= chunk.position.X then
+                    -- print("out of bounds x!")
+                    return true
+                end
+            elseif (chunk.position.X <= xMin) then
+                local outOfBoundsChunkPosition = BlockMap:getChunk(BlockMap:VoxelToRBX(Vector3.new(block.position.X - 1, block.position.Y, block.position.Z)))
+                if outOfBoundsChunkPosition.X ~= chunk.position.X then
+                    -- print("out of bounds -x!")
+                    return true
+                end
+            elseif (chunk.position.Y >= yMax) then
+                local outOfBoundsChunkPosition = BlockMap:getChunk(BlockMap:VoxelToRBX(Vector3.new(block.position.X, block.position.Y + 1, block.position.Z)))
+                if outOfBoundsChunkPosition.Y ~= chunk.position.Y then
+                    -- print("out of bounds y!")
+                    return true
+                end
+            elseif (chunk.position.Y <= yMin) then
+                local outOfBoundsChunkPosition = BlockMap:getChunk(BlockMap:VoxelToRBX(Vector3.new(block.position.X, block.position.Y - 1, block.position.Z)))
+                if outOfBoundsChunkPosition.Y ~= chunk.position.Y then
+                    -- print("out of bounds -y!")
+                    return true
+                end
+            else
+                return false
+                --  print("Not at edge")
+            end
+end
+
 local function drawChunk(hash)
     local chunk = WorldData[hash]
-
+    
     local function getChunkWithOptimizedBlocks(chunk): table
         local parsedBlocks = {}
         for blockHash, block in pairs(chunk.blocks) do
@@ -53,6 +117,10 @@ local function drawChunk(hash)
             end
 
             if (block.position.Y == 0) then
+                continue
+            end
+
+            if (isBlockAtWorldEdge(chunk, block)) then
                 continue
             end
 
@@ -187,12 +255,12 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 4
+    local loadRadius = 2
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 4
+    local cacheRadius = 2
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do

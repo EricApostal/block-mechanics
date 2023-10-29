@@ -61,7 +61,7 @@ end
 local function parseChunk(blocks, position)
     local didBlockCheck = false
     local lastChunk = nil
-    print("parsing chunk "..position.X..","..position.Y)
+    -- print("parsing chunk "..position.X..","..position.Y)
     -- print(blocks)
     for _, block in blocks do
         local blockTexture = "grass"
