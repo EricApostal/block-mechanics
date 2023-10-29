@@ -169,7 +169,7 @@ local function drawChunk(hash)
             end
 
             local touchingBlocks = getTouchingBlocks(block)
-            if (isChunkAtWorldEdge and (isBlockAtWorldEdge(chunk, block) and (touchingBlocks >= 5 or (isCornerBlock(chunk, block))))) then
+            if (isChunkAtWorldEdge and (isBlockAtWorldEdge(chunk, block) and (touchingBlocks >= 5))) then
                 continue
             end
 
