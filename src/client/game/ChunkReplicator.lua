@@ -155,6 +155,10 @@ local function drawChunk(hash)
     local function getChunkWithOptimizedBlocks(chunk): table
         local parsedBlocks = {}
         for blockHash, block in pairs(chunk.blocks) do
+            --[[
+                This is VERY laggy.
+                You'll likely need to do some hacky renderstepped stuff.
+            ]]
             if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
                 continue
             end
@@ -163,12 +167,12 @@ local function drawChunk(hash)
                 continue
             end
 
+            local touchingBlocks = getTouchingBlocks(block)
+
             if (isChunkAtWorldEdge == nil) then
                 isChunkAtWorldEdge = isEdgeChunk(chunk)
-                -- print("At chunk edge? "..tostring(isChunkAtWorldEdge))
             end
-
-            local touchingBlocks = getTouchingBlocks(block)
+            
             if (isChunkAtWorldEdge and (isBlockAtWorldEdge(chunk, block) and (touchingBlocks >= 5))) then
                 continue
             end
@@ -176,7 +180,6 @@ local function drawChunk(hash)
             if ((touchingBlocks == 6)) then
                 continue
             end
-
             table.insert(parsedBlocks, block)
         end
         return parsedBlocks
@@ -197,7 +200,6 @@ local function drawChunk(hash)
             return a.position.X < b.position.X -- Sort by X in ascending order
         end
     end)
-    
 
     local cacheInstances = {}
     local cachePositions = {}
@@ -234,25 +236,18 @@ local function drawChunk(hash)
         table.insert(cacheInstances, _cacheInstance)
         table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
     end
-    RunService.RenderStepped:Connect(function()
-        for _ = 1,8 do
+    local instanceCacheLoop = function()
+        for _ = 1,32 do
             if (cacheInstances[1]) then
                 cacheInstances[1].CFrame = cachePositions[1]
                 table.remove(cachePositions, 1)
                 table.remove(cacheInstances, 1)
+            else
+                RunService:UnbindFromRenderStep(hash)
             end
         end
-    end)
-    RunService.RenderStepped:Connect(function()
-        for _ = 1,8 do
-            if (cacheInstances[#cacheInstances]) then
-                cacheInstances[#cacheInstances].CFrame = cachePositions[#cacheInstances]
-                table.remove(cachePositions, #cacheInstances)
-                table.remove(cacheInstances, #cacheInstances)
-            end
-        end
-    end)
-    -- workspace:BulkMoveTo(cacheInstances, cachePositions)
+    end
+    RunService:BindToRenderStep(hash, 1, instanceCacheLoop)
 end
 
 local function drawBlock(block)
@@ -338,12 +333,12 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 1
+    local loadRadius = 2
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 1
+    local cacheRadius = 2
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
@@ -380,14 +375,7 @@ local function chunkListener()
         if (#toRequest > 0) then
             local chunks = requestChunkGroup(toRequest)
             for _, chunk in pairs(chunks) do
-                table.insert(toLoad, chunk)
-                -- print(WorldData[string.format("%s,%s",chunk.position.X, chunk.position.Y)])
-            end
-
-            for _, chunk in pairs(toLoad) do
-                -- print(WorldData[chunk])
                 drawChunk(chunk:getHash())
-                task.wait(0.5)
             end
         end
 
@@ -429,7 +417,7 @@ local function createBlockCache()
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end
 
-    for _ = 1, 5 do
+    for _ = 1, 10 do
         RunService.RenderStepped:Connect(function()
             if (#workspace.blockCache:GetChildren() < allowedCache) then
                 ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
