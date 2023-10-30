@@ -186,9 +186,9 @@ local function drawChunk(hash)
     local optimized = getChunkWithOptimizedBlocks(chunk)
 
     -- sort optimized such that the blocks are in rows / cols
-        table.sort(optimized, function(a, b)
-            return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
-        end)
+    -- table.sort(optimized, function(a, b)
+    --     return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
+    -- end)
 
     local cacheInstances = {}
     local cachePositions = {}
@@ -200,7 +200,7 @@ local function drawChunk(hash)
     for _, block in pairs(optimized) do
         local blockHash = block:getHash()
 
-        local _cacheInstance = ReplicatedStorage.blocks:WaitForChild("grass"):clone()
+        local _cacheInstance = workspace.blockCache:WaitForChild("grass")
         local _cacheTextureInstances = _cacheInstance:GetChildren()
 
         local _cacheTextures = {}
@@ -219,19 +219,10 @@ local function drawChunk(hash)
 
         _cacheInstance.Name = blockHash
         _cacheInstance.Parent = workspace.blocks[hash]
-        _cacheInstance.Position = BlockMap:VoxelToRBX(block.position)
+        table.insert(cacheInstances, _cacheInstance)
+        table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
     end
-    -- workspace:BulkMoveTo(cacheInstances, cachePositions)
-    -- for i, instance in ipairs(cacheInstances) do
-    --     instance.CFrame = cachePositions[i]
-    -- end
-    -- RunService.RenderStepped:Connect(function()
-    --     if (cacheInstances[1]) then
-    --         cacheInstances[1].CFrame = cachePositions[1]
-    --         table.remove(cachePositions, 1)
-    --         table.remove(cacheInstances, 1)
-    --     end
-    -- end)
+    workspace:BulkMoveTo(cacheInstances, cachePositions)
 end
 
 local function drawBlock(block)
@@ -408,7 +399,7 @@ local function createBlockCache()
         ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
     end
 
-    for _ = 1, 10 do
+    for _ = 1, 5 do
         RunService.RenderStepped:Connect(function()
             if (#workspace.blockCache:GetChildren() < allowedCache) then
                 ReplicatedStorage.blocks["grass"]:Clone().Parent = workspace.blockCache
