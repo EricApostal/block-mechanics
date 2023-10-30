@@ -186,9 +186,18 @@ local function drawChunk(hash)
     local optimized = getChunkWithOptimizedBlocks(chunk)
 
     -- sort optimized such that the blocks are in rows / cols
-    -- table.sort(optimized, function(a, b)
-    --     return a.position.X < b.position.X or (a.position.X == b.position.X and a.position.Y < b.position.Y) or (a.position.X == b.position.X and a.position.Y == b.position.Y and a.position.Z < b.position.Z)
-    -- end)
+    table.sort(optimized, function(a, b)
+        if a.position.X == b.position.X then
+            if a.position.Z == b.position.Z then
+                return a.position.Y > b.position.Y -- Sort by Y in descending order (top to bottom)
+            else
+                return a.position.Z < b.position.Z -- Sort by Z in ascending order
+            end
+        else
+            return a.position.X < b.position.X -- Sort by X in ascending order
+        end
+    end)
+    
 
     local cacheInstances = {}
     local cachePositions = {}
@@ -210,9 +219,12 @@ local function drawChunk(hash)
             end
         end
         -- Now we can get the texture, and copy the texture from the block in replicatedstorage, then apply it
-        for i, texture in ipairs(ReplicatedStorage.blocks[block.texture]:GetChildren()) do
+        for _, texture in ipairs(ReplicatedStorage.blocks[block.texture]:GetChildren()) do
             if (texture:IsA("Texture")) then
                 local face = texture.Face.Value
+                if not (_cacheTextures[face]) then
+                    continue
+                end
                 _cacheTextures[face].Texture = tostring(texture.Texture)
             end
         end
@@ -222,7 +234,25 @@ local function drawChunk(hash)
         table.insert(cacheInstances, _cacheInstance)
         table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
     end
-    workspace:BulkMoveTo(cacheInstances, cachePositions)
+    RunService.RenderStepped:Connect(function()
+        for _ = 1,8 do
+            if (cacheInstances[1]) then
+                cacheInstances[1].CFrame = cachePositions[1]
+                table.remove(cachePositions, 1)
+                table.remove(cacheInstances, 1)
+            end
+        end
+    end)
+    RunService.RenderStepped:Connect(function()
+        for _ = 1,8 do
+            if (cacheInstances[#cacheInstances]) then
+                cacheInstances[#cacheInstances].CFrame = cachePositions[#cacheInstances]
+                table.remove(cachePositions, #cacheInstances)
+                table.remove(cacheInstances, #cacheInstances)
+            end
+        end
+    end)
+    -- workspace:BulkMoveTo(cacheInstances, cachePositions)
 end
 
 local function drawBlock(block)
