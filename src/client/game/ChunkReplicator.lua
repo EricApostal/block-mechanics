@@ -200,7 +200,7 @@ local function drawChunk(hash)
     for _, block in pairs(optimized) do
         local blockHash = block:getHash()
 
-        local _cacheInstance = workspace.blockCache:WaitForChild("grass")
+        local _cacheInstance = ReplicatedStorage.blocks:WaitForChild("grass"):clone()
         local _cacheTextureInstances = _cacheInstance:GetChildren()
 
         local _cacheTextures = {}
@@ -219,27 +219,19 @@ local function drawChunk(hash)
 
         _cacheInstance.Name = blockHash
         _cacheInstance.Parent = workspace.blocks[hash]
-        table.insert(cacheInstances, _cacheInstance)
-        table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
+        _cacheInstance.Position = BlockMap:VoxelToRBX(block.position)
     end
     -- workspace:BulkMoveTo(cacheInstances, cachePositions)
     -- for i, instance in ipairs(cacheInstances) do
     --     instance.CFrame = cachePositions[i]
     -- end
-    RunService.RenderStepped:Connect(function()
-        if (cacheInstances[1]) then
-            cacheInstances[1].CFrame = cachePositions[1]
-            table.remove(cachePositions, 1)
-            table.remove(cacheInstances, 1)
-        end
-    end)
-    RunService.RenderStepped:Connect(function()
-        if (cacheInstances[#cacheInstances]) then
-            cacheInstances[#cacheInstances].CFrame = cachePositions[#cacheInstances]
-            table.remove(cachePositions, #cacheInstances)
-            table.remove(cacheInstances, #cacheInstances)
-        end
-    end)
+    -- RunService.RenderStepped:Connect(function()
+    --     if (cacheInstances[1]) then
+    --         cacheInstances[1].CFrame = cachePositions[1]
+    --         table.remove(cachePositions, 1)
+    --         table.remove(cacheInstances, 1)
+    --     end
+    -- end)
 end
 
 local function drawBlock(block)
@@ -374,7 +366,7 @@ local function chunkListener()
             for _, chunk in pairs(toLoad) do
                 -- print(WorldData[chunk])
                 drawChunk(chunk:getHash())
-                task.wait(.1)
+                task.wait(0.5)
             end
         end
 
