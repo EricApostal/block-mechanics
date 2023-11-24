@@ -1,10 +1,5 @@
---!native
-
-local ChunkReplicator = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
-local BlockService = Knit.GetService("BlockService")
 local Block = require(ReplicatedStorage.Common.blocks.Block)
 local Chunk = require(ReplicatedStorage.Common.chunks.Chunk)
 local BlockMap = require(ReplicatedStorage.Common.BlockMap)
@@ -12,6 +7,14 @@ local WorldBuilder = require(ReplicatedStorage.Common.world.WorldBuilder)
 local WorldData = require(ReplicatedStorage.Common.world.WorldData)
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+local player = game:GetService("Players").LocalPlayer
+
+local Knit = require(game:GetService("ReplicatedStorage").modules.knit)
+Knit.Start():catch(warn):await()
+BlockService = Knit.GetService("BlockService")
+
+-- Get localplayer character
+local Character = player.Character or player.CharacterAdded:Wait()
 
 local view_distance = 1
 
@@ -152,14 +155,10 @@ local function drawChunk(hash)
     local chunk = WorldData[hash]
     local isChunkAtWorldEdge = nil
 
-    local optimizedChunking = 64
     local function getChunkWithOptimizedBlocks(chunk): table
+        local optimizedChunking = 0
         local parsedBlocks = {}
         for blockHash, block in pairs(chunk.blocks) do
-            --[[
-                This is VERY laggy.
-                You'll likely need to do some hacky renderstepped stuff.
-            ]]
             if (workspace.blocks:FindFirstChild(hash) and workspace.blocks[hash]:FindFirstChild(blockHash)) then
                 continue
             end
@@ -181,7 +180,7 @@ local function drawChunk(hash)
             if ((touchingBlocks == 6)) then
                 continue
             end
-            if (optimizedChunking == 64) then
+            if (optimizedChunking == 32) then
                 task.wait()
                 optimizedChunking = 0
             else
@@ -194,57 +193,72 @@ local function drawChunk(hash)
     end
     
 
-    local optimized = getChunkWithOptimizedBlocks(chunk)
-
-    -- sort optimized such that the blocks are in rows / cols
-    -- table.sort(optimized, function(a, b)
-    --     if a.position.X == b.position.X then
-    --         if a.position.Z == b.position.Z then
-    --             return a.position.Y > b.position.Y -- Sort by Y in descending order (top to bottom)
-    --         else
-    --             return a.position.Z < b.position.Z -- Sort by Z in ascending order
-    --         end
-    --     else
-    --         return a.position.X < b.position.X -- Sort by X in ascending order
-    --     end
-    -- end)
-
-    local cacheInstances = {}
-    local cachePositions = {}
-
-    while #workspace.blockCache:GetChildren() < #optimized do
-        task.wait()
+    local actor = script:GetActor()
+    if actor == nil then
+        local workers = {}
+    
+        while #workers < 2 do
+            local actor = Instance.new("Actor")
+            script:Clone().Parent = actor
+            table.insert(workers, actor)
+        end
+    
+        -- Parent all actors under self
+        print("parenting actors...")
+        for _, actor in workers do
+            actor.Parent = script
+        end
+        print("done parenting actors, distributing load...")
+        
+        workers[math.random(#workers)]:SendMessage("genChunk", chunk)
+    
+        -- exit from the script; the following code will run in each actor
+        return
     end
 
-    for _, block in pairs(optimized) do
-        local blockHash = block:getHash()
-
-        local _cacheInstance = workspace.blockCache:WaitForChild("grass")
-        local _cacheTextureInstances = _cacheInstance:GetChildren()
-
-        local _cacheTextures = {}
-        for _, texture in ipairs(_cacheTextureInstances) do
-            if (texture:IsA("Texture")) then
-                _cacheTextures[texture.Face.Value] = texture
-            end
+    actor:BindToMessageParallel("genChunk", function(chunk)
+        -- Do heavy load shit
+        task.synchronize()
+        local optimized = getChunkWithOptimizedBlocks(chunk)
+        local cacheInstances = {}
+        local cachePositions = {}
+    
+        while #workspace.blockCache:GetChildren() < #optimized do
+            task.wait()
         end
-        -- Now we can get the texture, and copy the texture from the block in replicatedstorage, then apply it
-        for _, texture in ipairs(ReplicatedStorage.blocks[block.texture]:GetChildren()) do
-            if (texture:IsA("Texture")) then
-                local face = texture.Face.Value
-                if not (_cacheTextures[face]) then
-                    continue
+    
+        for _, block in pairs(optimized) do
+            local blockHash = block:getHash()
+    
+            local _cacheInstance = workspace.blockCache:WaitForChild("grass")
+            local _cacheTextureInstances = _cacheInstance:GetChildren()
+    
+            local _cacheTextures = {}
+            for _, texture in ipairs(_cacheTextureInstances) do
+                if (texture:IsA("Texture")) then
+                    _cacheTextures[texture.Face.Value] = texture
                 end
-                _cacheTextures[face].Texture = tostring(texture.Texture)
             end
+            -- Now we can get the texture, and copy the texture from the block in replicatedstorage, then apply it
+            for _, texture in ipairs(ReplicatedStorage.blocks[block.texture]:GetChildren()) do
+                if (texture:IsA("Texture")) then
+                    local face = texture.Face.Value
+                    if not (_cacheTextures[face]) then
+                        continue
+                    end
+                    _cacheTextures[face].Texture = tostring(texture.Texture)
+                end
+            end
+    
+            _cacheInstance.Name = blockHash
+            _cacheInstance.Parent = workspace.blocks[hash]
+            table.insert(cacheInstances, _cacheInstance)
+            table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
+            workspace:BulkMoveTo(cacheInstances, cachePositions)
         end
+        -- Bulk move in workspace
+    end)
 
-        _cacheInstance.Name = blockHash
-        _cacheInstance.Parent = workspace.blocks[hash]
-        table.insert(cacheInstances, _cacheInstance)
-        table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
-        workspace:BulkMoveTo(cacheInstances, cachePositions)
-    end
 end
 
 local function drawBlock(block)
@@ -314,20 +328,24 @@ local function requestChunkGroup(groupTable)
     print("Requesting Data: ")
     print(groupTable)
     BlockService:GetChunkGroup(groupTable):andThen(function(chunks)
-        print("Making objects...")
         for _, chunkArray in chunks do
             local chunk = Chunk:new(table.unpack(chunkArray))
             table.insert(chunkGroup, chunk)
             WorldData[chunk:getHash()] = chunk
             task.wait()
         end
-        print("finished making objects")
         complete = true
     end)
 
     -- Shit async -> sync
     while not complete do task.wait() end
     return chunkGroup
+end
+
+local function requestChunksMiddleMan(chunks)
+    for _, chunk in pairs(chunks) do
+        drawChunk(chunk:getHash())
+    end
 end
 
 -- Create a listener to automatically send requests for chunks in a specified radius.
@@ -338,12 +356,12 @@ local function chunkListener()
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
     -- Radius to not delete
-    local cacheRadius = 2
+    local cacheRadius = 1
 
     -- Every frame, check the radius around us, and if there are any chunks that need to be loaded, load them.
     while true do
-        local chunkPosition = BlockMap:getChunk(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position)
-
+        local chunkPosition = BlockMap:getChunk(Character:WaitForChild("HumanoidRootPart").Position)
+        print(chunkPosition)
         -- Load the chunks around us.
         local loadChunks = {}
         local cacheChunks = {}
@@ -374,9 +392,7 @@ local function chunkListener()
         -- end
         if (#toRequest > 0) then
             local chunks = requestChunkGroup(toRequest)
-            for _, chunk in pairs(chunks) do
-                drawChunk(chunk:getHash())
-            end
+            requestChunksMiddleMan(chunks)
         end
 
         local instances = {}
@@ -426,10 +442,9 @@ local function createBlockCache()
     end
 end
 
-function ChunkReplicator:init()
+local function init()
     listener()
     task.spawn(createBlockCache)
     task.spawn(chunkListener)
 end
-
-return ChunkReplicator
+init()
