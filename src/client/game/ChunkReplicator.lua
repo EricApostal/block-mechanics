@@ -152,6 +152,7 @@ local function drawChunk(hash)
     local chunk = WorldData[hash]
     local isChunkAtWorldEdge = nil
 
+    local optimizedChunking = 64
     local function getChunkWithOptimizedBlocks(chunk): table
         local parsedBlocks = {}
         for blockHash, block in pairs(chunk.blocks) do
@@ -180,6 +181,13 @@ local function drawChunk(hash)
             if ((touchingBlocks == 6)) then
                 continue
             end
+            if (optimizedChunking == 64) then
+                task.wait()
+                optimizedChunking = 0
+            else
+                optimizedChunking += 1
+            end
+
             table.insert(parsedBlocks, block)
         end
         return parsedBlocks
@@ -189,17 +197,17 @@ local function drawChunk(hash)
     local optimized = getChunkWithOptimizedBlocks(chunk)
 
     -- sort optimized such that the blocks are in rows / cols
-    table.sort(optimized, function(a, b)
-        if a.position.X == b.position.X then
-            if a.position.Z == b.position.Z then
-                return a.position.Y > b.position.Y -- Sort by Y in descending order (top to bottom)
-            else
-                return a.position.Z < b.position.Z -- Sort by Z in ascending order
-            end
-        else
-            return a.position.X < b.position.X -- Sort by X in ascending order
-        end
-    end)
+    -- table.sort(optimized, function(a, b)
+    --     if a.position.X == b.position.X then
+    --         if a.position.Z == b.position.Z then
+    --             return a.position.Y > b.position.Y -- Sort by Y in descending order (top to bottom)
+    --         else
+    --             return a.position.Z < b.position.Z -- Sort by Z in ascending order
+    --         end
+    --     else
+    --         return a.position.X < b.position.X -- Sort by X in ascending order
+    --     end
+    -- end)
 
     local cacheInstances = {}
     local cachePositions = {}
@@ -235,19 +243,8 @@ local function drawChunk(hash)
         _cacheInstance.Parent = workspace.blocks[hash]
         table.insert(cacheInstances, _cacheInstance)
         table.insert(cachePositions, CFrame.new(BlockMap:VoxelToRBX(block.position)))
+        workspace:BulkMoveTo(cacheInstances, cachePositions)
     end
-    local instanceCacheLoop = function()
-        for _ = 1,32 do
-            if (cacheInstances[1]) then
-                cacheInstances[1].CFrame = cachePositions[1]
-                table.remove(cachePositions, 1)
-                table.remove(cacheInstances, 1)
-            else
-                RunService:UnbindFromRenderStep(hash)
-            end
-        end
-    end
-    RunService:BindToRenderStep(hash, 1, instanceCacheLoop)
 end
 
 local function drawBlock(block)
@@ -317,11 +314,14 @@ local function requestChunkGroup(groupTable)
     print("Requesting Data: ")
     print(groupTable)
     BlockService:GetChunkGroup(groupTable):andThen(function(chunks)
+        print("Making objects...")
         for _, chunkArray in chunks do
             local chunk = Chunk:new(table.unpack(chunkArray))
             table.insert(chunkGroup, chunk)
             WorldData[chunk:getHash()] = chunk
+            task.wait()
         end
+        print("finished making objects")
         complete = true
     end)
 
@@ -333,7 +333,7 @@ end
 -- Create a listener to automatically send requests for chunks in a specified radius.
 local function chunkListener()
     -- Radius to actively load
-    local loadRadius = 2
+    local loadRadius = 1
 
     -- local chunk = loadChunk(0,1)
     -- drawChunk(chunk:getHash())
