@@ -1,6 +1,8 @@
 # Block Mechanics
 An open-sourced voxel engine built for Roblox.
 
+The game can be played [here](https://roblox.com/games/13555520675)!
+
 # About
 Block Mechanics (not the final name) is a demo of what is possible as far as voxels go in Roblox. There are multiple iterations of this project.
 
